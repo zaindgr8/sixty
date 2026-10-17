@@ -756,3 +756,15 @@ b .you-tag, .tog b .you-tag { margin: 0 0 0 6px; vertical-align: 2px; }
   .channel { max-width: 440px; width: 100%; justify-self: center; }
   .channel .wa, .callpane { height: 540px; max-width: none; }
 }
+
+/* Inbox rows stay inside their column: a long last message is cut with "…" instead of widening the row */
+.inbox > *, .inbox-list, .inbox-list li { min-width: 0; }
+.inbox-list button { overflow: hidden; }
+
+/* Customer portal login (registered users) */
+.portal-link { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--panel); color: var(--text); text-decoration: none; font-size: .88rem; font-weight: 500; transition: border-color .2s, background .2s; }
+.portal-link:hover { border-color: var(--accent); background: var(--accent-soft); }
+@media (max-width: 560px) {
+  .portal-link { padding: 8px 10px; }
+  .portal-link span { display: none; }
+}

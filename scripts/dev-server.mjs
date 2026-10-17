@@ -1,16 +1,16 @@
 // Local / self-hosted server: serves the static site and POST /api/contact.
-// Run: node server.mjs   (reads .env in this folder)
+// Run: npm run dev   (reads .env in the project root). Not used on Vercel, which serves the static files and /api functions itself.
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { handleContact } from './lib/contact.mjs';
-import { handleVoiceCall } from './lib/voice.mjs';
-import { handleWaChat } from './lib/wa-chat.mjs';
-import { handleLeadExtract } from './lib/lead-extract.mjs';
+import { handleContact } from '../lib/contact.mjs';
+import { handleVoiceCall } from '../lib/voice.mjs';
+import { handleWaChat } from '../lib/wa-chat.mjs';
+import { handleLeadExtract } from '../lib/lead-extract.mjs';
 
-const ROOT = fileURLToPath(new URL('.', import.meta.url));
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const PORT = Number(process.env.PORT || 4173);
 
 // Minimal .env loader (no dependency).
@@ -95,7 +95,7 @@ createServer(async (req, res) => {
   let path = normalize(decodeURIComponent(url.pathname)).replace(/^(\.\.[/\\])+/, '');
   if (path.endsWith('/')) path += 'index.html';
   const file = join(ROOT, path);
-  if (!file.startsWith(ROOT) || !PUBLIC.has(extname(file)) || /[/\\](lib|api|node_modules)[/\\]|server\.mjs$/.test(file)) {
+  if (!file.startsWith(ROOT) || !PUBLIC.has(extname(file)) || /[/\\](lib|api|scripts|agents|node_modules)[/\\]/.test(file)) {
     res.writeHead(404); return res.end('Not found');
   }
   try {

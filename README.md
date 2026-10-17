@@ -5,7 +5,7 @@ Static page (`index.html`, `styles.css`, `main.js`) plus four small endpoints: `
 ## Run locally
 
 ```bash
-node server.mjs
+npm run dev
 ```
 
 Opens on http://localhost:4173 and reads secrets from `.env` (not committed; see `.env.example`).
@@ -14,7 +14,7 @@ Opens on http://localhost:4173 and reads secrets from `.env` (not committed; see
 
 **Vercel (recommended):** import this folder. `api/contact.js` becomes the form endpoint automatically. In Project → Settings → Environment Variables add `RESEND_API_KEY`, `CONTACT_TO`, `RESEND_FROM`, `GEMINI_API_KEY` and optionally `GEMINI_CHAT_MODEL` / `GEMINI_VOICE`.
 
-**Any Node host:** run `node server.mjs` with the same environment variables.
+**Any Node host:** run `npm run dev` (scripts/dev-server.mjs) with the same environment variables.
 
 ## Email (Resend)
 

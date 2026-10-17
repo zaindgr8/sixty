@@ -38,10 +38,80 @@ class Pcm16 extends AudioWorkletProcessor {
 }
 registerProcessor('pcm16', Pcm16);`;
 
+
+// ---- Office ambience: quiet room tone, distant chatter and the odd burst of typing behind Freya ----
+// Generated in the browser (no audio files). It plays straight to the speakers, so it doesn't move the orb.
+const AMBIENCE_VOLUME = 1; // 0 turns it off; 1.5 is noticeably busier
+
+function startAmbience(ctx) {
+  if (!AMBIENCE_VOLUME) return () => {};
+  const master = ctx.createGain();
+  master.gain.setValueAtTime(0, ctx.currentTime);
+  master.gain.linearRampToValueAtTime(AMBIENCE_VOLUME, ctx.currentTime + 1.5); // fade in
+  master.connect(ctx.destination);
+
+  const noise = (seconds, brown) => {
+    const len = Math.floor(ctx.sampleRate * seconds);
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1;
+      if (brown) { last = (last + 0.02 * w) / 1.02; d[i] = last * 3.5; } else d[i] = w;
+    }
+    return buf;
+  };
+  const loop = (buf) => { const s = ctx.createBufferSource(); s.buffer = buf; s.loop = true; s.start(); return s; };
+
+  // 1. Room tone / air conditioning
+  const room = loop(noise(4, true));
+  const roomLp = ctx.createBiquadFilter(); roomLp.type = 'lowpass'; roomLp.frequency.value = 700;
+  const roomGain = ctx.createGain(); roomGain.gain.value = 0.05;
+  room.connect(roomLp).connect(roomGain).connect(master);
+
+  // 2. Distant chatter: voice-band noise whose loudness drifts like people talking across the office
+  const chat = loop(noise(3, false));
+  const chatBp = ctx.createBiquadFilter(); chatBp.type = 'bandpass'; chatBp.frequency.value = 520; chatBp.Q.value = 1.4;
+  const chatGain = ctx.createGain(); chatGain.gain.value = 0.006;
+  chat.connect(chatBp).connect(chatGain).connect(master);
+  const chatter = setInterval(() => {
+    const t = ctx.currentTime;
+    chatGain.gain.linearRampToValueAtTime(0.002 + Math.random() * 0.012, t + 0.25);
+    chatBp.frequency.linearRampToValueAtTime(380 + Math.random() * 400, t + 0.25);
+  }, 280);
+
+  // 3. Someone typing nearby, in short bursts every few seconds
+  const clickBuf = noise(0.02, false);
+  const click = (at, level) => {
+    const s = ctx.createBufferSource(); s.buffer = clickBuf;
+    const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1800 + Math.random() * 1500;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(level, at);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + 0.018);
+    s.connect(hp).connect(g).connect(master);
+    s.start(at); s.stop(at + 0.03);
+  };
+  let typingTimer = null;
+  const typingBurst = () => {
+    let t = ctx.currentTime + 0.05;
+    const keys = 6 + Math.floor(Math.random() * 22);
+    for (let i = 0; i < keys; i++) { t += 0.07 + Math.random() * 0.12; click(t, 0.012 + Math.random() * 0.016); }
+    typingTimer = setTimeout(typingBurst, 3500 + Math.random() * 9000);
+  };
+  typingTimer = setTimeout(typingBurst, 2000);
+
+  return () => {
+    clearInterval(chatter);
+    clearTimeout(typingTimer);
+    try { master.gain.setTargetAtTime(0, ctx.currentTime, 0.2); } catch { /* context closed */ }
+    setTimeout(() => { try { room.stop(); chat.stop(); master.disconnect(); } catch { /* already stopped */ } }, 600);
+  };
+}
+
 const engine = (() => {
   let phase = 'idle';
   let ws = null, mic = null, out = null;
-  let raf = null, limitTimer = null, booked = false;
+  let raf = null, limitTimer = null, booked = false, stopAmbience = () => {};
 
   const setPhase = (p, message) => { phase = p; emit('phase', { phase: p, message }); };
 
@@ -115,8 +185,9 @@ const engine = (() => {
     if (m.setupComplete) {
       setPhase('live');
       level();
+      if (out) stopAmbience = startAmbience(out.ctx);
       limitTimer = setTimeout(() => stop('That’s the end of the demo call. Thanks for talking to Freya!'), MAX_CALL_MS);
-      ws.send(JSON.stringify({ clientContent: { turns: [{ role: 'user', parts: [{ text: '(The visitor just clicked "Talk to Freya" on the Sixty website. Greet them warmly and briefly.)' }] }], turnComplete: true } }));
+      ws.send(JSON.stringify({ clientContent: { turns: [{ role: 'user', parts: [{ text: '(The visitor just joined the call from the Sixty website. Greet them warmly and briefly as "Freya from Sixty" and ask who you are speaking with.)' }] }], turnComplete: true } }));
       return;
     }
     const sc = m.serverContent;
@@ -193,6 +264,8 @@ const engine = (() => {
   function cleanup(message) {
     clearTimeout(limitTimer);
     cancelAnimationFrame(raf);
+    stopAmbience();
+    stopAmbience = () => {};
     const socket = ws;
     ws = null;
     if (socket && socket.readyState <= 1) { socket.onclose = null; socket.close(1000); }
