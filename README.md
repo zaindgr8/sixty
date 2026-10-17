@@ -27,8 +27,8 @@ Opens on http://localhost:4173 and reads secrets from `.env` (not committed; see
 
 ## Live voice demo (Retell)
 
-- The floating orb ("Talk to Freya") starts a browser voice call with the Retell agent in `RETELL_AGENT_ID` (Vizz Real Estate Freya). The server creates the call at `POST /api/voice-call`; the API key never reaches the browser.
-- Visitors type a first name and play a lead who enquired about Tilal Binghatti townhouses; those demo details are passed to Freya's prompt (`lib/voice.mjs`).
+- The floating orb ("Talk to Freya") starts a browser voice call with the Retell agent in `RETELL_AGENT_ID` (Sixty by DevMate - Freya). The server creates the call at `POST /api/voice-call`; the API key never reaches the browser.
+- The orb runs **Freya, Sixty's AI sales agent**: she asks about the visitor's business and use case and books a 15-minute demo. Her prompt is in `agents/sixty-sales-agent-prompt.md`; after each call Retell extracts the meeting time, name, email, company and use case (see the call's analysis in the Retell dashboard).
 - Every call costs Retell minutes. The Node server allows 3 calls per hour per IP. On Vercel, add a firewall rate limit, and set a short **max call duration** on the agent in Retell (e.g. 3–5 minutes).
 - Leave `RETELL_AGENT_VERSION` unset to use Retell's default version, or pin a published version.
 

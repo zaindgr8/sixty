@@ -1,4 +1,4 @@
-// "Talk to Freya" floating orb: a live browser voice call with a Retell agent.
+// "Talk to Freya" floating orb: a live browser voice call with Freya, Sixty's AI sales agent (Retell).
 // The server (/api/voice-call) creates the call; the Retell web SDK is only loaded when someone starts one.
 
 const SDK_URL = 'https://cdn.jsdelivr.net/npm/retell-client-js-sdk@2.0.8/+esm';
@@ -25,7 +25,7 @@ function open(show) {
   panel.hidden = !show;
   orb.setAttribute('aria-expanded', String(show));
   wrap.classList.toggle('open', show);
-  if (show && phase === 'idle') setTimeout(() => $('vp-name').focus(), 50);
+  if (show && phase === 'idle') setTimeout(() => startBtn.focus(), 50);
 }
 
 function setPhase(p, label) {
@@ -64,7 +64,7 @@ function reset(message) {
   if (message) showError(message);
 }
 
-async function start(name) {
+async function start() {
   showError('');
   startBtn.disabled = true;
   setPhase('connecting', 'Connecting to Freya…');
@@ -80,7 +80,7 @@ async function start(name) {
   try {
     const [{ RetellWebClient }, res] = await Promise.all([
       import(SDK_URL),
-      fetch('/api/voice-call', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) }),
+      fetch('/api/voice-call', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }),
     ]);
     const out = await res.json().catch(() => ({}));
     if (!res.ok || !out.accessToken) throw new Error(out.error || "We couldn't start the call. Please try again.");
@@ -89,7 +89,7 @@ async function start(name) {
     client.on('call_started', () => { setPhase('live', 'Freya is on the line'); startTimer(); animateLevel(); });
     client.on('agent_start_talking', () => { wrap.classList.add('talking'); stateEl.textContent = 'Freya is speaking'; });
     client.on('agent_stop_talking', () => { wrap.classList.remove('talking'); stateEl.textContent = 'Listening…'; });
-    client.on('call_ended', () => { client = null; reset(); showError('Call ended. Want Sixty to make calls like this for you? Book a demo below.'); });
+    client.on('call_ended', () => { client = null; reset(); showError('Call ended. Thanks for talking to Freya! You can also reach us at management@devmatesolutions.com.'); });
     client.on('error', (e) => { console.error('Retell error', e); client?.stopCall(); client = null; reset('The call dropped. Please try again.'); });
 
     await client.startCall({ accessToken: out.accessToken });
@@ -112,7 +112,7 @@ $('vp-close').addEventListener('click', () => open(false));
 $('vp-end').addEventListener('click', end);
 form.addEventListener('submit', (e) => {
   e.preventDefault();
-  if (phase === 'idle') start($('vp-name').value.trim());
+  if (phase === 'idle') start();
 });
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !panel.hidden && phase === 'idle') { open(false); orb.focus(); }
