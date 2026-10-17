@@ -37,6 +37,7 @@ const store = {
     const data = Object.fromEntries(new FormData(form));
     const bad = !data.name?.trim() ? '#f-name'
       : !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(data.email || '') ? '#f-email'
+      : (String(data.phone || '').replace(/\D/g, '').length < 7) ? '#f-phone'
       : !data.company?.trim() ? '#f-company'
       : !data.industry ? '#f-industry' : null;
     $$('.field.err', form).forEach((f) => f.classList.remove('err'));

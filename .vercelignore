@@ -2,3 +2,4 @@
 .env.local
 scripts/
 README.md
+email-previews/

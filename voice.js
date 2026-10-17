@@ -218,7 +218,8 @@ const engine = (() => {
         body: JSON.stringify({
           name: a.name, email: a.email, phone: a.phone || '', company: a.company || 'Not given',
           country: a.country || '', industry: a.industry || 'Other', interest: a.interest || 'WhatsApp AI Agent',
-          plan: 'Booked by voice with Freya',
+          plan: 'Booked by voice with Freya', source: 'voice', meeting_time: a.meeting_time || '',
+          contact_pref: a.phone ? 'WhatsApp' : 'Email',
           message: `Demo booked by voice with Freya.\nMeeting: ${a.meeting_time}\n\nUse case: ${a.use_case || '—'}`,
         }),
       });
