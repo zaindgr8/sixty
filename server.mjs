@@ -7,6 +7,8 @@ import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { handleContact } from './lib/contact.mjs';
 import { handleVoiceCall } from './lib/voice.mjs';
+import { handleWaChat } from './lib/wa-chat.mjs';
+import { handleLeadExtract } from './lib/lead-extract.mjs';
 
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
 const PORT = Number(process.env.PORT || 4173);
@@ -66,6 +68,26 @@ createServer(async (req, res) => {
     let body = {};
     try { body = JSON.parse((await readBody(req, 2_000)) || '{}'); } catch { /* name is optional */ }
     const { status, body: out } = await handleVoiceCall(body);
+    return json(res, status, out);
+  }
+
+  if (url.pathname === '/api/wa-chat') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false, error: 'Method not allowed' });
+    const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+    if (limited(`chat:${ip}`, 40, 10 * 60_000)) return json(res, 429, { ok: false, error: "You're chatting fast! Give it a minute and try again." });
+    let body = {};
+    try { body = JSON.parse((await readBody(req, 4_000)) || '{}'); } catch { return json(res, 400, { ok: false, error: 'Type a message first.' }); }
+    const { status, body: out } = await handleWaChat(body);
+    return json(res, status, out);
+  }
+
+  if (url.pathname === '/api/lead-extract') {
+    if (req.method !== 'POST') return json(res, 405, { ok: false, error: 'Method not allowed' });
+    const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+    if (limited(`extract:${ip}`, 60, 10 * 60_000)) return json(res, 429, { ok: false, error: 'Too many updates. Try again shortly.' });
+    let body = {};
+    try { body = JSON.parse((await readBody(req, 30_000)) || '{}'); } catch { return json(res, 400, { ok: false, error: 'Bad request.' }); }
+    const { status, body: out } = await handleLeadExtract(body);
     return json(res, status, out);
   }
 

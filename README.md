@@ -1,6 +1,6 @@
 # Sixty by DevMate — landing page
 
-Static page (`index.html`, `styles.css`, `main.js`) plus two small endpoints: `POST /api/contact` emails form submissions through Resend, and `POST /api/voice-call` starts the live Retell voice demo.
+Static page (`index.html`, `styles.css`, `main.js`) plus four small endpoints: `POST /api/contact` (form emails via Resend), `POST /api/wa-chat` (WhatsApp demo), `POST /api/voice-call` (Gemini Live token) and `POST /api/lead-extract` (CRM fields from call transcripts).
 
 ## Run locally
 
@@ -12,7 +12,7 @@ Opens on http://localhost:4173 and reads secrets from `.env` (not committed; see
 
 ## Deploy
 
-**Vercel (recommended):** import this folder. `api/contact.js` becomes the form endpoint automatically. In Project → Settings → Environment Variables add `RESEND_API_KEY`, `CONTACT_TO`, `RESEND_FROM`, `RETELL_API_KEY` and `RETELL_AGENT_ID`.
+**Vercel (recommended):** import this folder. `api/contact.js` becomes the form endpoint automatically. In Project → Settings → Environment Variables add `RESEND_API_KEY`, `CONTACT_TO`, `RESEND_FROM`, `GEMINI_API_KEY` and optionally `GEMINI_CHAT_MODEL` / `GEMINI_VOICE`.
 
 **Any Node host:** run `node server.mjs` with the same environment variables.
 
@@ -25,12 +25,15 @@ Opens on http://localhost:4173 and reads secrets from `.env` (not committed; see
   3. Once a verified sender is set, the lead also gets an automatic "Thanks, we got your message" email.
 - Spam protection: hidden honeypot field, input length limits, and 5 submissions per 10 minutes per IP on the Node server.
 
-## Live voice demo (Retell)
+## Live demo: WhatsApp | Call (Gemini)
 
-- The floating orb ("Talk to Freya") starts a browser voice call with the Retell agent in `RETELL_AGENT_ID` (Sixty by DevMate - Freya). The server creates the call at `POST /api/voice-call`; the API key never reaches the browser.
-- The orb runs **Freya, Sixty's AI sales agent**: she asks about the visitor's business and use case and books a 15-minute demo. Her prompt is in `agents/sixty-sales-agent-prompt.md`; after each call Retell extracts the meeting time, name, email, company and use case (see the call's analysis in the Retell dashboard).
-- Every call costs Retell minutes. The Node server allows 3 calls per hour per IP. On Vercel, add a firewall rate limit, and set a short **max call duration** on the agent in Retell (e.g. 3–5 minutes).
-- Leave `RETELL_AGENT_VERSION` unset to use Retell's default version, or pin a published version.
+The "Try it live" section (right after the hero) lets visitors be the lead. A toggle switches between:
+- **WhatsApp:** chat with Freya. `POST /api/wa-chat` sends the conversation to Gemini (`GEMINI_CHAT_MODEL`, default `gemini-3.8-flash`) with the prompt in `agents/sixty-whatsapp-chat-prompt.md`, and gets back her next message plus the lead fields as structured JSON.
+- **Call:** a live voice call with Freya on **Gemini Live** (`gemini-3.8-live`, prompt in `agents/sixty-voice-gemini-prompt.md`). `POST /api/voice-call` mints a one-time, 15-minute Gemini token with the prompt, voice and tools locked in, so the browser talks to Gemini directly without seeing the key. After each of Freya's turns, `POST /api/lead-extract` reads the transcript with Gemini and returns the lead fields. When Freya books the demo she calls `book_demo`, which emails the team through `/api/contact`.
+
+Both channels feed the same CRM panel (pipeline card, lead card, inbox, activity feed, KPIs). The floating orb uses the same voice engine (`voice.js`), so orb calls update the CRM too.
+
+Limits on the Node server: voice 3 calls/hour per IP (10 min max each), chat 20 visitor messages per conversation and 40 per 10 minutes per IP, extraction 60 per 10 minutes. On Vercel, add equivalent firewall rate limits.
 
 ## Before launch
 
@@ -42,3 +45,7 @@ Opens on http://localhost:4173 and reads secrets from `.env` (not committed; see
 ## Pricing
 
 Prices are set in `PRICES` in `main.js` (USD and AED, monthly and yearly). The JSON-LD offers in `index.html` repeat the USD monthly prices.
+
+## Retell (no longer used by the site)
+
+The Retell agents created earlier still exist in your Retell account ("Sixty by DevMate - Freya (Sales & Meetings)" for phone calls and the WhatsApp demo chat agent). The website now runs entirely on Gemini; the `RETELL_*` values in `.env` are unused and can be removed.

@@ -168,7 +168,7 @@ addEventListener('resize', onScroll);
 
 // ---- Use-case tabs ----
 (() => {
-  const tabs = $$('[role="tab"]');
+  const tabs = $$('.tabs [role="tab"]');
   function select(tab, focus) {
     tabs.forEach((t) => {
       const on = t === tab;

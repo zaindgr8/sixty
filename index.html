@@ -129,7 +129,7 @@
       <p class="lede">Sixty answers every lead in under 60 seconds, day or night. It replies like your best rep, qualifies the lead, books the next step and updates your CRM before your competitor even sees the message.</p>
       <div class="cta-row">
         <a class="btn" href="#contact" data-cta="demo">Get your free demo <span aria-hidden="true">→</span></a>
-        <a class="btn btn-ghost" href="#how">See how it works</a>
+        <a class="btn btn-ghost" href="#live">Try the live demo</a>
       </div>
       <ul class="trust" aria-label="Highlights">
         <li>Official WhatsApp Business API</li>
@@ -179,45 +179,116 @@
   </div>
 </section>
 
-<!-- PAIN -->
-<section class="sec pain" aria-labelledby="pain-h">
+<!-- LIVE DEMO: WhatsApp chat + CRM -->
+<section class="sec live-sec" id="live" aria-labelledby="live-h">
   <div class="sec-in">
-    <p class="eyebrow">Sound familiar?</p>
-    <h2 id="pain-h">Every sales team has sent these messages.<br><span class="dim">Every one of them cost a deal.</span></h2>
+    <p class="eyebrow">Try it live · no sign-up</p>
+    <h2 id="live-h">Be the lead. Message or call Freya,<br><span class="dim">and watch the CRM fill itself in.</span></h2>
+    <p class="sub">This is the real AI, not a recording. Pick WhatsApp or a voice call, tell Freya about your business, and see Sixty qualify you and book the next step in real time.</p>
 
-    <div class="pain-grid">
-      <article class="pcard reveal">
-        <div class="pbubble in">Is this still available?<time>Sun 11:48 PM</time></div>
-        <div class="pbubble out">Sorry for the late reply! Yes, it is 🙏<time>Mon 10:02 AM</time></div>
-        <div class="pbubble in late">Thanks, already booked with someone else.<time>Mon 10:03 AM</time></div>
-        <p class="pnote">10 hours of silence. One lost deal.</p>
-      </article>
-      <article class="pcard reveal">
-        <div class="pbubble in">Price?<time>Tue 2:14 PM</time></div>
-        <div class="pbubble out">
-          <span class="r-uae">Dear, kindly share your number, our agent will call you.</span>
-          <span class="r-usa">Thanks for reaching out! A team member will get back to you shortly.</span>
-          <time>Tue 6:40 PM</time>
+    <div class="live-grid">
+      <div class="channel">
+      <div class="seg ch-toggle" role="tablist" aria-label="Choose a channel">
+        <button type="button" role="tab" id="ch-wa" aria-controls="wa-pane" aria-selected="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          WhatsApp
+        </button>
+        <button type="button" role="tab" id="ch-call" aria-controls="call-pane" aria-selected="false" tabindex="-1">
+          <svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          Call
+        </button>
+      </div>
+      <!-- WhatsApp phone -->
+      <div class="wa" id="wa-pane" role="tabpanel" aria-labelledby="ch-wa">
+        <div class="wa-head">
+          <span class="wa-av" aria-hidden="true">F</span>
+          <div class="wa-who"><b>Freya · Sixty</b><small id="wa-status">online</small></div>
+          <span class="wa-badge">AI</span>
         </div>
-        <div class="pbubble in late">✓✓ Seen</div>
-        <p class="pnote">One-word leads get ignored. Some of them were buyers.</p>
-      </article>
-      <article class="pcard reveal">
-        <div class="pbubble out">Hi! Just circling back on my last message 😊<time>Day 3</time></div>
-        <div class="pbubble out">Following up again, are you still interested?<time>Day 6</time></div>
-        <div class="pbubble in late">Who is this?<time>Day 9</time></div>
-        <p class="pnote">Slow first replies turn hot leads into strangers.</p>
-      </article>
-    </div>
+        <ol class="wa-log" id="wa-log" aria-live="polite">
+          <li class="wa-day">Today</li>
+          <li class="wam in">Hi! 👋 I'm Freya from Sixty. Thanks for stopping by. What's your name, and what kind of business do you run?<time>now</time></li>
+        </ol>
+        <div class="wa-chips" id="wa-chips">
+          <button type="button">I run a real estate agency in Dubai</button>
+          <button type="button">We're a restaurant in New York</button>
+          <button type="button">How much does it cost?</button>
+          <button type="button">Is this really AI?</button>
+        </div>
+        <form class="wa-input" id="wa-form" autocomplete="off">
+          <label for="wa-text" class="sr">Message Freya</label>
+          <input id="wa-text" type="text" maxlength="600" placeholder="Type a message">
+          <button type="submit" aria-label="Send"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6l-.01 6.53L15 12 3.39 13.87Z" fill="currentColor"/></svg></button>
+        </form>
+      </div>
 
-    <div class="stats">
+      <!-- Voice call (Gemini Live, same engine as the floating orb) -->
+      <div class="callpane" id="call-pane" role="tabpanel" aria-labelledby="ch-call" data-phase="idle" hidden>
+        <div class="wa-head">
+          <span class="wa-av" aria-hidden="true">F</span>
+          <div class="wa-who"><b>Freya · Sixty</b><small id="cp-status">AI voice agent</small></div>
+          <span class="wa-badge">VOICE</span>
+        </div>
+        <div class="cp-stage">
+          <button type="button" class="cp-orb" id="cp-orb" aria-label="Start a live call with Freya">
+            <span class="orb-ring" aria-hidden="true"></span>
+            <span class="orb-ring r2" aria-hidden="true"></span>
+            <span class="orb-core" aria-hidden="true">
+              <svg class="orb-mic" viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span class="orb-bars"><i></i><i></i><i></i><i></i></span>
+            </span>
+          </button>
+          <p class="cp-state" id="cp-state" role="status">Tap to call Freya</p>
+          <p class="cp-timer dot" id="cp-timer">00:00</p>
+        </div>
+        <ol class="cp-log" id="cp-log" aria-live="polite">
+          <li class="cp-hint">Your conversation will appear here as you talk. Try: “Hi, I run a real estate agency in Dubai.”</li>
+        </ol>
+        <div class="cp-actions">
+          <button type="button" class="btn full" id="cp-start">
+            <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Start live call
+          </button>
+          <button type="button" class="vp-end full" id="cp-end" hidden>End call</button>
+          <p class="vp-err" id="cp-err" role="alert"></p>
+          <p class="vp-note">Uses your microphone, right in your browser. Calls may be recorded to improve quality.</p>
+        </div>
+      </div>
+      </div>
+
+      <!-- CRM -->
+      <div class="crm" id="crm">
+        <aside class="crm-side" role="tablist" aria-label="Dashboard views">
+          <span class="p-logo" aria-hidden="true"></span>
+          <button role="tab" data-view="inbox">Inbox <i class="crm-dot" id="dot-inbox"></i></button>
+          <button role="tab" data-view="lead">Your lead</button>
+          <button role="tab" data-view="pipeline" aria-selected="true">Pipeline</button>
+          <button role="tab" data-view="agent">AI agent</button>
+          <button role="tab" data-view="calls">Calls</button>
+          <button role="tab" data-view="analytics">Analytics</button>
+        </aside>
+        <div class="crm-main">
+          <div class="p-kpis">
+            <div><small>Your reply time</small><b class="dot" id="k-reply">--:--</b></div>
+            <div><small>Leads this week</small><b class="dot" id="k-leads">312</b></div>
+            <div><small>After-hours leads</small><b class="dot">41%</b></div>
+            <div><small>Booked by AI</small><b class="dot" id="k-booked">87</b></div>
+          </div>
+          <div class="crm-view" id="crm-view"></div>
+          <div class="crm-feed" id="crm-feed" aria-live="polite"><span class="live" aria-hidden="true"></span><span id="feed-text">Waiting for your first message…</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="stats live-stats">
       <div class="stat reveal"><b class="dot">7×</b><p>more likely to qualify a lead when you contact them within an hour rather than an hour later.</p></div>
       <div class="stat reveal"><b class="dot">60×</b><p>more likely to qualify a lead in the first hour than after 24 hours.</p></div>
       <div class="stat reveal"><b class="dot">23%</b><p>of companies audited never responded to an online lead at all.</p></div>
     </div>
     <p class="source">Source: Oldroyd, McElheran &amp; Elkington, “The Short Life of Online Sales Leads,” Harvard Business Review, 2011.</p>
+    <p class="source">Live demo powered by Sixty. Example leads are illustrative; your lead card is real and only lives in this browser tab.</p>
   </div>
 </section>
+
 
 <!-- 60 SECONDS -->
 <section class="sec sixty" id="how" aria-labelledby="how-h">
@@ -270,37 +341,6 @@
         </ul>
       </article>
     </div>
-  </div>
-</section>
-
-<!-- PORTAL -->
-<section class="sec" aria-labelledby="portal-h">
-  <div class="sec-in">
-    <p class="eyebrow">Command center</p>
-    <h2 id="portal-h">See every conversation. Step in anytime.</h2>
-    <p class="sub">One dashboard for WhatsApp and calls. Watch the AI work, take over any chat with one click, and see which leads are ready to close.</p>
-
-    <div class="portal reveal" role="img" aria-label="Sixty dashboard showing the lead pipeline with columns New, Qualified, Booked and Won">
-      <aside class="p-side">
-        <span class="p-logo"></span>
-        <span class="p-nav on">Inbox</span><span class="p-nav">Leads</span><span class="p-nav">Pipeline</span><span class="p-nav">AI agent</span><span class="p-nav">Calls</span><span class="p-nav">Analytics</span>
-      </aside>
-      <div class="p-main">
-        <div class="p-kpis">
-          <div><small>Median first reply</small><b class="dot">00:04</b></div>
-          <div><small>Leads this week</small><b class="dot">312</b></div>
-          <div><small>After-hours leads</small><b class="dot">41%</b></div>
-          <div><small>Booked by AI</small><b class="dot">87</b></div>
-        </div>
-        <div class="p-board">
-          <div class="p-col"><h4>New <i>24</i></h4><div class="p-card"><b>Omar K.</b><span>2BR · JVC · AED 90k</span></div><div class="p-card"><b>Lisa M.</b><span>Table for 6 · Fri</span></div></div>
-          <div class="p-col"><h4>Qualified <i>18</i></h4><div class="p-card hot"><b>Sara A.</b><span>Ready this month</span></div><div class="p-card"><b>Dan R.</b><span>Pre-approved</span></div></div>
-          <div class="p-col"><h4>Booked <i>11</i></h4><div class="p-card"><b>Priya S.</b><span>Sat 11:00 viewing</span></div><div class="p-card"><b>Mike T.</b><span>Test drive · Thu</span></div></div>
-          <div class="p-col"><h4>Won <i>6</i></h4><div class="p-card won"><b>Ali H.</b><span>Signed · AED 140k</span></div></div>
-        </div>
-      </div>
-    </div>
-    <p class="source">Example data for illustration.</p>
   </div>
 </section>
 
@@ -653,6 +693,7 @@
       <div class="vp-meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <p class="vp-state" id="vp-state" role="status" aria-live="polite">Connecting…</p>
       <p class="vp-timer dot" id="vp-timer">00:00</p>
+      <p class="vp-caption" id="vp-caption" aria-live="off"></p>
       <button type="button" class="vp-end" id="vp-end">
         <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18"><path d="M3 15.5c5-4.5 13-4.5 18 0l-2.3 2.3a1 1 0 0 1-1.3.1l-2.2-1.6a1 1 0 0 1-.4-.9l.2-1.7a12 12 0 0 0-6 0l.2 1.7a1 1 0 0 1-.4.9l-2.2 1.6a1 1 0 0 1-1.3-.1Z" fill="currentColor"/></svg>
         End call
@@ -676,5 +717,6 @@
 
 <script src="main.js" defer></script>
 <script src="voice.js" type="module"></script>
+<script src="live-demo.js" defer></script>
 </body>
 </html>
