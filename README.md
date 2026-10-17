@@ -35,6 +35,18 @@ Both channels feed the same CRM panel (pipeline card, lead card, inbox, activity
 
 Limits on the Node server: voice 3 calls/hour per IP (10 min max each), chat 20 visitor messages per conversation and 40 per 10 minutes per IP, extraction 60 per 10 minutes. On Vercel, add equivalent firewall rate limits.
 
+## Leads CRM (Google Sheet)
+
+Every lead is saved in the **Sixty Leads CRM** Google Sheet (owned by desigeek0007@gmail.com): website form submissions, WhatsApp demo chats and voice demo calls. One chat or call stays one row (matched on *Record ID*) and fills in as Freya learns more. Your team owns the *Sales status*, *Owner* and *Notes* columns; the website never overwrites them. The *Summary* tab counts everything automatically.
+
+Route: website -> n8n automation **"Sixty: leads to Google Sheet CRM"** (`CRM_WEBHOOK_URL`) -> Apps Script web app inside the sheet (`CRM_SHEET_URL`) -> Leads tab. n8n stores no Google login. If n8n is offline, the website sends the lead straight to the Apps Script, so nothing is lost.
+
+One-time setup (sheet owner):
+1. In the sheet: Extensions > Apps Script, paste `scripts/sheet-crm-apps-script.local.gs` (the copy with your secret; it is not committed), Save. On another machine use `scripts/sheet-crm-apps-script.gs` and replace PASTE_CRM_WEBHOOK_SECRET_HERE with `CRM_WEBHOOK_SECRET`.
+2. Deploy > New deployment > Web app. Execute as: Me. Who has access: Anyone. Deploy and authorise.
+3. Copy the Web app URL (ends in `/exec`) into `CRM_SHEET_URL` (in `.env` and in Vercel).
+4. In Vercel, also set `CRM_WEBHOOK_URL` and `CRM_WEBHOOK_SECRET` (same values as `.env`), then redeploy.
+
 ## Before launch
 
 - Add `og-image.png` (1200×630) for link previews on WhatsApp, LinkedIn and X.

@@ -39,6 +39,8 @@
   const state = {
     view: 'pipeline',
     // Conversation sent to Gemini each turn; starts with Freya's greeting from the page.
+    conversationId: `wa-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`, // one CRM row per chat
+    startedAt: Date.now(),
     history: [{ role: 'model', text: document.querySelector('#wa-log .wam.in')?.firstChild?.textContent?.trim() || '' }],
     lead: null, // created on the first message
     lastMsg: '',
@@ -258,7 +260,7 @@
     const t0 = performance.now();
     setTimeout(() => busy && typing(true), 350);
     try {
-      const res = await fetch('/api/wa-chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ history: state.history.slice(-40) }) });
+      const res = await fetch('/api/wa-chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ history: state.history.slice(-40), conversationId: state.conversationId, startedAt: state.startedAt }) });
       const out = await res.json().catch(() => ({}));
       if (!res.ok || !out.ok) throw new Error(out.error || 'Freya is having trouble replying. Please try again.');
       const ms = performance.now() - t0;
@@ -314,6 +316,7 @@
   const transcript = []; // [{role:'user'|'agent', text}]
   let cur = null; // the bubble being written
   let callTick = null, callStart = 0, extracting = false, pending = false, heardSince = false;
+  const callMeta = { id: '', startedAt: 0 };
 
   const startCall = () => { pickChannel($('#ch-call')); voice()?.start(); };
   $('#cp-orb').addEventListener('click', () => (voice()?.phase === 'idle' ? startCall() : voice()?.stop()));
@@ -336,7 +339,7 @@
     if (extracting) { pending = true; return; }
     extracting = true;
     try {
-      const res = await fetch('/api/lead-extract', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ transcript: transcript.slice(-60) }) });
+      const res = await fetch('/api/lead-extract', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ transcript: transcript.slice(-60), callId: callMeta.id, startedAt: callMeta.startedAt }) });
       const out = await res.json().catch(() => ({}));
       if (res.ok && out.crm) applyCrm(out.crm);
     } catch { /* the next turn will try again */ } finally {
@@ -351,6 +354,7 @@
       cpStart.hidden = d.phase !== 'idle';
       cpEnd.hidden = d.phase === 'idle';
       $('#cp-status').textContent = d.phase === 'live' ? 'on call' : d.phase === 'connecting' ? 'calling…' : 'AI voice agent';
+      if (d.callId && d.callId !== callMeta.id) { callMeta.id = d.callId; callMeta.startedAt = d.startedAt; transcript.length = 0; }
       if (d.phase === 'connecting') { $('#cp-err').textContent = ''; cpState.textContent = 'Connecting to Freya…'; pickChannel($('#ch-call')); }
       if (d.phase === 'live') {
         ensureLead('Call');

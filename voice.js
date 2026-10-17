@@ -112,8 +112,9 @@ const engine = (() => {
   let phase = 'idle';
   let ws = null, mic = null, out = null;
   let raf = null, limitTimer = null, booked = false, stopAmbience = () => {};
+  let callId = '', callStartedAt = 0; // one CRM row per call
 
-  const setPhase = (p, message) => { phase = p; emit('phase', { phase: p, message }); };
+  const setPhase = (p, message) => { phase = p; emit('phase', { phase: p, message, callId, startedAt: callStartedAt }); };
 
   async function startMic() {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } });
@@ -218,7 +219,7 @@ const engine = (() => {
         body: JSON.stringify({
           name: a.name, email: a.email, phone: a.phone || '', company: a.company || 'Not given',
           country: a.country || '', industry: a.industry || 'Other', interest: a.interest || 'WhatsApp AI Agent',
-          plan: 'Booked by voice with Freya', source: 'voice', meeting_time: a.meeting_time || '',
+          plan: 'Booked by voice with Freya', source: 'voice', meeting_time: a.meeting_time || '', record_id: callId,
           contact_pref: a.phone ? 'WhatsApp' : 'Email',
           message: `Demo booked by voice with Freya.\nMeeting: ${a.meeting_time}\n\nUse case: ${a.use_case || '—'}`,
         }),
@@ -236,6 +237,8 @@ const engine = (() => {
   async function start() {
     if (phase !== 'idle') return;
     booked = false;
+    callId = `call-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    callStartedAt = Date.now();
     setPhase('connecting');
     startOutput(); // created inside the click so the browser lets it play sound
     try {
