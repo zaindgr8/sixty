@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Sixty: 100 clients by 1 Jan 2027</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#0a0a0b; --card:#121213; --line:#262628; --text:#f2f2f2; --muted:#a3a3a3; --dim:#6e6e6e; --red:#e5484d; --soft:rgba(229,72,77,.12); --ok:#3ee0a6;
+  --f-display:"Lexend","Helvetica Neue",Arial,sans-serif; --f-mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 var(--f-display);padding-top:env(safe-area-inset-top,0px)}
+.wrap{max-width:820px;margin:0 auto;padding:28px max(16px,env(safe-area-inset-left,0px)) 80px max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:22px}
+h1{font-size:26px;margin:0;letter-spacing:-.02em}
+h2{font-size:17px;margin:0 0 10px;letter-spacing:-.01em}
+.kicker{font:500 11px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.muted{color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.bar{height:8px;background:#1d1d1f;border-radius:99px;overflow:hidden;margin-top:12px}
+.bar i{display:block;height:100%;width:0;background:var(--red);transition:width .4s ease}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.stat{border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stat b{display:block;font:600 22px var(--f-mono)}
+.stat span{font-size:12px;color:var(--muted)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tabs button{font:500 13px var(--f-display);color:var(--muted);background:none;border:1px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--text);color:var(--bg);border-color:var(--text)}
+.today{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.today input{background:#1a1a1b;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:14px var(--f-mono)}
+ul.todo{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+ul.todo li{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border-radius:12px;border:1px solid transparent}
+ul.todo li:hover{border-color:var(--line)}
+ul.todo input{margin-top:4px;width:18px;height:18px;accent-color:var(--red);flex:none;cursor:pointer}
+ul.todo label{cursor:pointer;flex:1;min-width:0}
+ul.todo .t{font-weight:500}
+ul.todo .why{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+ul.todo .tag{font:500 10px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim);border:1px solid var(--line);border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:2px}
+ul.todo li.done .t{text-decoration:line-through;color:var(--dim)}
+ul.todo li.done{opacity:.6}
+.days{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px}
+.day{font:500 12px var(--f-mono);text-align:center;padding:8px 0;border-radius:10px;border:1px solid var(--line);color:var(--dim)}
+.day.past{color:var(--muted)}
+.day.done{background:var(--ok);color:#06140e;border-color:var(--ok)}
+.day.today-b{border-color:var(--red);color:var(--text)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 6px;border-bottom:1px solid var(--line)}
+th{font:500 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+td input{width:90px;background:#1a1a1b;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:14px var(--f-mono)}
+.fill{font:500 12px var(--f-mono);color:var(--muted)}
+.btn{font:500 13px var(--f-display);color:var(--muted);background:none;border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer}
+.btn:hover{color:var(--text);border-color:var(--muted)}
+.note{font-size:12px;color:var(--dim)}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+@media (max-width:600px){ .stats{grid-template-columns:1fr 1fr 1fr} h1{font-size:22px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="kicker">Sixty · private tracker</p>
+    <h1>100 clients by 1 January 2027</h1>
+    <p class="muted" style="margin:6px 0 0">Tick the day's tasks. Progress is saved in this browser.</p>
+    <div class="card" style="margin-top:16px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
+        <b style="font-size:18px" id="overall">0 / 100 clients</b>
+        <span class="muted" id="pace">Set your starting count below</span>
+      </div>
+      <div class="bar"><i id="bar"></i></div>
+      <div class="stats">
+        <div class="stat"><b id="s-days">0</b><span>days left</span></div>
+        <div class="stat"><b id="s-need">0</b><span>clients / week needed</span></div>
+        <div class="stat"><b id="s-streak">0</b><span>day streak</span></div>
+      </div>
+      <div class="today" style="margin-top:14px">
+        <label class="muted">Paying clients today
+          <input id="clients" type="number" min="0" max="500" value="0" inputmode="numeric" style="margin-left:6px;width:90px">
+        </label>
+        <span class="note">Update when a client pays. The total is yours to set.</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" aria-selected="true" data-tab="today">Today</button>
+    <button role="tab" aria-selected="false" data-tab="plan">Strategy</button>
+    <button role="tab" aria-selected="false" data-tab="weeks">Weekly targets</button>
+    <button role="tab" aria-selected="false" data-tab="log">Daily log</button>
+  </nav>
+
+  <!-- TODAY -->
+  <section id="tab-today" class="card">
+    <div class="today">
+      <div>
+        <h2 id="today-title">Today</h2>
+        <span class="note" id="today-note"></span>
+      </div>
+      <button class="btn" id="reset-day" type="button">Reset today</button>
+    </div>
+    <ul class="todo" id="todo" style="margin-top:12px"></ul>
+  </section>
+
+  <!-- STRATEGY -->
+  <section id="tab-plan" class="card" hidden>
+    <h2>The strategy in five lines</h2>
+    <ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px">
+      <li><b>One offer.</b> WhatsApp AI agent, Founding price, free setup until 31 Dec, live in 7 days.</li>
+      <li><b>Two home verticals.</b> UAE real estate brokerages and clinics. USA through agency partners.</li>
+      <li><b>Partners are the multiplier.</b> One agency with 5 to 10 clients beats 10 cold leads.</li>
+      <li><b>Show, don't tell.</b> A live demo number and "Talk to Freya" beat any pitch deck.</li>
+      <li><b>Measure weekly.</b> Replies, meetings, demos, closes. Cut what doesn't convert.</li>
+    </ol>
+    <h2 style="margin-top:18px">Where the 100 come from</h2>
+    <table>
+      <tr><th>Source</th><th>Target</th><th>Owner</th></tr>
+      <tr><td>Agency partners (white-label)</td><td>40 clients</td><td>Founder</td></tr>
+      <tr><td>LinkedIn outreach (UAE, USA)</td><td>25 clients</td><td>Founder + sales</td></tr>
+      <tr><td>Referrals from clients</td><td>15 clients</td><td>Customer success</td></tr>
+      <tr><td>Cold email (US and UAE)</td><td>10 clients</td><td>Sales</td></tr>
+      <tr><td>Inbound (website, demo, Meta ads)</td><td>10 clients</td><td>Marketing</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">Adjust these numbers as you learn. The weekly targets below assume this mix.</p>
+  </section>
+
+  <!-- WEEKLY -->
+  <section id="tab-weeks" class="card" hidden>
+    <h2>Weekly targets (cumulative clients)</h2>
+    <table id="weeks-table"></table>
+    <p class="note" style="margin-top:10px">Targets start at 3 and reach 100 by week 11. Edit a number to change the target.</p>
+  </section>
+
+  <!-- LOG -->
+  <section id="tab-log" class="card" hidden>
+    <h2>Last 14 days</h2>
+    <div class="days" id="days"></div>
+    <p class="note" style="margin-top:12px">Green = at least 80% of that day's tasks done. Tap a day to see it in Today (past days can be reviewed, not changed).</p>
+  </section>
+
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const KEY = 'sixty-tracker-v1';
+
+  // ---- Daily checklist: same list every day, grouped by what it moves ----
+  const TASKS = [
+    { id: 'follow', t: 'Follow up every lead from yesterday (WhatsApp first)', why: 'Speed wins deals', tag: 'sales' },
+    { id: 'pitch10', t: 'Send 10 personal LinkedIn messages to UAE real estate or clinic owners', why: 'Founder-led outreach', tag: 'LinkedIn' },
+    { id: 'pitch5', t: 'Send 5 personal LinkedIn messages to US agency owners', why: 'Partner pipeline', tag: 'LinkedIn' },
+    { id: 'partner', t: 'Contact 2 agencies about becoming a white-label partner', why: 'Partners bring 5 to 10 clients each', tag: 'partners' },
+    { id: 'demo', t: 'Run or book at least 2 demos', why: 'Demos convert', tag: 'sales' },
+    { id: 'post', t: 'Post 1 short video: a "spot the AI" chat or a client result', why: 'Proof sells', tag: 'content' },
+    { id: 'demonum', t: 'Check the live demo WhatsApp and voice still work', why: 'Broken demos lose deals', tag: 'product' },
+    { id: 'ask', t: 'Ask 1 happy client for a referral or a testimonial', why: 'Referrals are cheapest', tag: 'referrals' },
+    { id: 'email', t: 'Send the cold email batch (50 people, personalised)', why: 'Reach the US market', tag: 'email' },
+    { id: 'fix', t: 'Fix one product issue that slowed onboarding', why: 'Onboarding limits growth', tag: 'product' },
+    { id: 'log', t: 'Update the client count and note what worked today', why: 'Measure to improve', tag: 'review' },
+  ];
+
+  // ---- Weekly cumulative targets (edit freely) ----
+  const WEEKS = [3, 7, 13, 20, 28, 37, 47, 59, 73, 88, 100];
+  const GOAL = 100;
+  const END = new Date('2027-01-01T00:00:00');
+
+  // ---- Storage (browser only, wrapped so a blocked store never breaks the page) ----
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
+  const save = (d) => { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} };
+  const data = load();
+  data.days = data.days || {};       // { 'YYYY-MM-DD': { taskId: true } }
+  data.clients = data.clients || {}; // { 'YYYY-MM-DD': number }
+  data.weeks = data.weeks || WEEKS;
+
+  const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const todayKey = iso(new Date());
+  let viewKey = todayKey;
+
+  // ---- Clients: latest value recorded on or before a date ----
+  const clientsOn = (key) => {
+    const ks = Object.keys(data.clients).filter((k) => k <= key).sort();
+    return ks.length ? data.clients[ks[ks.length - 1]] : 0;
+  };
+
+  // ---- Today's checklist ----
+  function renderTodo() {
+    const done = data.days[viewKey] || {};
+    const readOnly = viewKey !== todayKey;
+    $('today-title').textContent = readOnly ? new Date(viewKey + 'T00:00').toDateString() : 'Today · ' + new Date().toDateString();
+    $('today-note').textContent = readOnly ? 'Past day: read only' : 'Tick each task when it is done';
+    $('reset-day').hidden = readOnly;
+    $('clients').disabled = readOnly;
+    $('clients').value = data.clients[viewKey] ?? clientsOn(viewKey);
+    const ul = $('todo');
+    ul.innerHTML = '';
+    for (const task of TASKS) {
+      const li = document.createElement('li');
+      const isDone = !!done[task.id];
+      li.className = isDone ? 'done' : '';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.id = 'c-' + task.id; cb.checked = isDone; cb.disabled = readOnly;
+      cb.addEventListener('change', () => {
+        data.days[todayKey] = data.days[todayKey] || {};
+        data.days[todayKey][task.id] = cb.checked;
+        save(data); renderAll();
+      });
+      const label = document.createElement('label');
+      label.htmlFor = cb.id;
+      label.innerHTML = '';
+      const t = document.createElement('span'); t.className = 't'; t.textContent = task.t;
+      const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = task.tag;
+      const why = document.createElement('span'); why.className = 'why'; why.textContent = task.why;
+      t.appendChild(tag); label.append(t, why);
+      li.append(cb, label);
+      ul.appendChild(li);
+    }
+  }
+
+  // ---- Progress header ----
+  function renderProgress() {
+    const now = clientsOn(todayKey);
+    const pct = Math.min(100, Math.round((now / GOAL) * 100));
+    $('overall').textContent = `${now} / ${GOAL} clients`;
+    $('bar').style.width = pct + '%';
+    const daysLeft = Math.max(0, Math.ceil((END - new Date()) / 86400000));
+    $('s-days').textContent = daysLeft;
+    const weeksLeft = Math.max(1, daysLeft / 7);
+    $('s-need').textContent = Math.max(0, Math.ceil((GOAL - now) / weeksLeft));
+    // Are we on the weekly target?
+    const weekIdx = Math.min(WEEKS.length - 1, Math.floor((Date.now() - new Date('2026-10-19').getTime()) / (7 * 86400000)));
+    const target = data.weeks[Math.max(0, weekIdx)];
+    $('pace').textContent = now >= target ? `On track: this week's target is ${target}` : `${target - now} behind this week's target of ${target}`;
+    // Streak: consecutive days, ending today, with >= 80% done
+    let streak = 0;
+    for (let d = new Date(); ; d.setDate(d.getDate() - 1)) {
+      const k = iso(d);
+      const doneCount = Object.values(data.days[k] || {}).filter(Boolean).length;
+      if (doneCount / TASKS.length >= 0.8) streak++; else break;
+      if (streak > 365) break;
+    }
+    $('s-streak').textContent = streak;
+  }
+
+  // ---- Weekly table (editable targets) ----
+  function renderWeeks() {
+    const rows = data.weeks.map((target, i) => {
+      const start = new Date('2026-10-19T00:00'); start.setDate(start.getDate() + i * 7);
+      const end = new Date(start); end.setDate(end.getDate() + 6);
+      const wkEnd = iso(end);
+      const actual = clientsOn(wkEnd > todayKey ? todayKey : wkEnd);
+      const mark = actual >= target ? 'Done' : (iso(start) <= todayKey ? 'In progress' : 'Upcoming');
+      return `<tr><td>Week ${i + 1}<br><span class="note">${start.toDateString().slice(4, 10)} to ${end.toDateString().slice(4, 10)}</span></td>
+        <td><input type="number" min="0" max="500" value="${target}" data-week="${i}" aria-label="Week ${i + 1} target"></td>
+        <td class="fill">${actual} clients</td><td class="note">${mark}</td></tr>`;
+    }).join('');
+    $('weeks-table').innerHTML = `<tr><th>Week</th><th>Target</th><th>Actual</th><th>Status</th></tr>${rows}`;
+    document.querySelectorAll('[data-week]').forEach((el) => el.addEventListener('change', () => {
+      data.weeks[+el.dataset.week] = Math.max(0, +el.value || 0); save(data); renderWeeks(); renderProgress();
+    }));
+  }
+
+  // ---- Last 14 days ----
+  function renderLog() {
+    const cells = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const k = iso(d);
+      const n = Object.values(data.days[k] || {}).filter(Boolean).length;
+      const cls = ['day', k < todayKey ? 'past' : '', n / TASKS.length >= 0.8 ? 'done' : '', k === todayKey ? 'today-b' : ''].join(' ');
+      cells.push(`<button class="${cls}" data-day="${k}" title="${k}: ${n}/${TASKS.length} done" style="background:${n / TASKS.length >= 0.8 ? '' : 'none'};cursor:pointer">${d.getDate()}/${d.getMonth() + 1}<br><span style="font-size:10px">${n}/${TASKS.length}</span></button>`);
+    }
+    $('days').innerHTML = cells.join('');
+    document.querySelectorAll('[data-day]').forEach((el) => el.addEventListener('click', () => { viewKey = el.dataset.day; showTab('today'); renderAll(); }));
+  }
+
+  function renderAll() { renderTodo(); renderProgress(); renderWeeks(); renderLog(); }
+
+  // ---- Tabs ----
+  function showTab(name) {
+    for (const b of document.querySelectorAll('[data-tab]')) b.setAttribute('aria-selected', String(b.dataset.tab === name));
+    for (const s of ['today', 'plan', 'weeks', 'log']) $('tab-' + s).hidden = s !== name;
+  }
+  document.querySelectorAll('[data-tab]').forEach((b) => b.addEventListener('click', () => {
+    if (b.dataset.tab === 'today') viewKey = todayKey;
+    showTab(b.dataset.tab);
+  }));
+
+  // ---- Inputs ----
+  $('clients').addEventListener('change', (e) => {
+    data.clients[todayKey] = Math.max(0, Math.min(500, +e.target.value || 0));
+    save(data); renderAll();
+  });
+  $('reset-day').addEventListener('click', () => {
+    if (!confirm('Clear today’s ticks?')) return;
+    delete data.days[todayKey]; save(data); renderAll();
+  });
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
