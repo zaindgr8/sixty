@@ -1,8 +1,8 @@
 /**
  * Sixty Leads CRM: receives leads from sixty.devmatesolutions.com and saves them in the "Leads" tab.
  *
- * Install (once), in the Sixty Leads CRM sheet:
- *   Extensions > Apps Script > replace everything with this file > Save
+ * Install (once), signed in as the sheet owner:
+ *   script.google.com > New project (or Extensions > Apps Script in the sheet) > replace everything with this file > Save
  *   Deploy > New deployment > type "Web app"
  *     Execute as: Me (desigeek0007@gmail.com)   Who has access: Anyone
  *   Deploy > authorize > copy the Web app URL (ends in /exec) into the website's CRM_SHEET_URL.
@@ -14,6 +14,7 @@
 
 const SECRET = 'PASTE_CRM_WEBHOOK_SECRET_HERE'; // must match CRM_WEBHOOK_SECRET on the website (see .env)
 const TAB = 'Leads';
+const SHEET_ID = '1qsyCCxKYzFMj1Y0h-sCLTi58jBGmktTjJZsYnfaczqY'; // Sixty Leads CRM
 
 // Sheet header -> field name sent by the website
 const FIELDS = {
@@ -53,7 +54,7 @@ function doPost(e) {
   const lock = LockService.getScriptLock();
   lock.waitLock(15000);
   try {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(TAB);
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(TAB);
     const width = sheet.getLastColumn();
     const headers = sheet.getRange(1, 1, 1, width).getValues()[0];
     const idCol = headers.indexOf('Record ID');

@@ -4,3 +4,4 @@ node_modules/
 .vercel/
 email-previews/
 *.local.gs
+.DS_Store
