@@ -3,6 +3,7 @@
 const PRICES = {
   usd: { sym: '$', starter: [149, 124], growth: [299, 249], scale: [599, 499], setup: 499 },
   aed: { sym: 'AED ', starter: [549, 459], growth: [1099, 919], scale: [2199, 1835], setup: 1835 },
+  gbp: { sym: '£', starter: [119, 99], growth: [239, 199], scale: [479, 399], setup: 399 },
 };
 
 const root = document.documentElement;
@@ -66,15 +67,19 @@ const store = {
   });
 })();
 
-// ---- Region + currency + billing ----
+// ---- Currency ($ / AED / £) + billing ----
+// Currency drives everything: prices, and which hero chat script shows (AED→UAE, $→USA, £→UK).
+const CUR_REGION = { aed: 'uae', usd: 'usa', gbp: 'uk' };
 const state = { region: 'uae', cur: 'aed', bill: 'm' };
 const fmt = (n) => n.toLocaleString('en-US');
 
-function guessRegion() {
-  const saved = store.get('sm-region');
-  if (saved === 'uae' || saved === 'usa') return saved;
+function guessCurrency() {
+  const saved = store.get('sm-cur');
+  if (PRICES[saved]) return saved;
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-  return /^Asia\/(Dubai|Muscat|Qatar|Bahrain|Kuwait|Riyadh)$/.test(tz) ? 'uae' : 'usa';
+  if (/^Asia\/(Dubai|Muscat|Qatar|Bahrain|Kuwait|Riyadh)$/.test(tz)) return 'aed';
+  if (/^Europe\/(London|Belfast|Guernsey|Isle_of_Man|Jersey)$/.test(tz)) return 'gbp';
+  return 'usd';
 }
 
 function renderPrices() {
@@ -95,18 +100,17 @@ function renderPrices() {
   $$('[data-set-bill]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.setBill === state.bill)));
 }
 
-function setRegion(r, save) {
-  state.region = r;
-  state.cur = r === 'uae' ? 'aed' : 'usd';
-  root.dataset.region = r;
-  $$('[data-set-region]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.setRegion === r)));
-  if (save) store.set('sm-region', r);
+function setCurrency(c, save) {
+  if (!PRICES[c]) return;
+  state.cur = c;
+  state.region = CUR_REGION[c];
+  root.dataset.region = state.region;
+  if (save) store.set('sm-cur', c);
   renderPrices();
   chat.restart();
 }
 
-$$('[data-set-region]').forEach((b) => b.addEventListener('click', () => setRegion(b.dataset.setRegion, true)));
-$$('[data-set-cur]').forEach((b) => b.addEventListener('click', () => { state.cur = b.dataset.setCur; renderPrices(); }));
+$$('[data-set-cur]').forEach((b) => b.addEventListener('click', () => setCurrency(b.dataset.setCur, true)));
 $$('[data-set-bill]').forEach((b) => b.addEventListener('click', () => { state.bill = b.dataset.setBill; renderPrices(); }));
 
 // ---- Hero: 60-second dial + chat ----
@@ -202,5 +206,5 @@ if (matchMedia('(hover: hover)').matches) {
   }));
 }
 
-setRegion(guessRegion(), false);
+setCurrency(guessCurrency(), false);
 onScroll();

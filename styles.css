@@ -50,7 +50,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .sel { user-select: all; color: var(--text); }
 
 /* region switching */
-html[data-region="uae"] .r-usa, html[data-region="usa"] .r-uae { display: none !important; }
+html:not([data-region="uae"]) .r-uae, html:not([data-region="usa"]) .r-usa, html:not([data-region="uk"]) .r-uk { display: none !important; }
 
 /* background */
 .bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; }

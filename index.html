@@ -151,9 +151,10 @@
       <a href="#faq">FAQ</a>
     </nav>
     <div class="nav-right">
-      <div class="region" role="group" aria-label="Choose your market">
-        <button type="button" data-set-region="uae" aria-pressed="true">UAE</button>
-        <button type="button" data-set-region="usa" aria-pressed="false">USA</button>
+      <div class="region" role="group" aria-label="Choose your currency">
+        <button type="button" data-set-cur="usd" aria-pressed="false" aria-label="US dollars">$</button>
+        <button type="button" data-set-cur="aed" aria-pressed="true" aria-label="UAE dirhams">AED</button>
+        <button type="button" data-set-cur="gbp" aria-pressed="false" aria-label="British pounds">£</button>
       </div>
       <a class="portal-link" href="https://portal.devmatesolutions.com" rel="noopener" aria-label="Customer portal login">
         <svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l4-4-4-4M14 12H4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -199,7 +200,7 @@
       <div class="phone">
         <div class="phone-head">
           <span class="avatar" aria-hidden="true">S</span>
-          <div><b class="r-uae">Marina Homes</b><b class="r-usa">Bayside Realty</b><small><span class="live" aria-hidden="true"></span> replies instantly</small></div>
+          <div><b class="r-uae">Marina Homes</b><b class="r-usa">Bayside Realty</b><b class="r-uk">Kensington Lettings</b><small><span class="live" aria-hidden="true"></span> replies instantly</small></div>
         </div>
         <ol class="chat" id="chat">
           <!-- UAE script -->
@@ -216,6 +217,13 @@
           <li class="m out r-usa" data-t="15">Great. I have Saturday 10am or Sunday 2pm. Which works better?</li>
           <li class="m in r-usa" data-t="22">Sunday 2</li>
           <li class="m out r-usa" data-t="25">Booked for Sunday 2:00pm ✓ Megan will meet you at the property.</li>
+          <!-- UK script -->
+          <li class="m in r-uk" data-t="0">Hi, is the 2-bed flat in Canary Wharf still available?</li>
+          <li class="m out r-uk" data-t="3">Hi Emma! Yes, it is. 2 bed, 2 bath, river view, £2,750 pcm. When are you looking to move in?</li>
+          <li class="m in r-uk" data-t="11">Next month. Can I view it this week?</li>
+          <li class="m out r-uk" data-t="15">Of course. I have Thursday 6pm or Saturday 11am. Which suits you best?</li>
+          <li class="m in r-uk" data-t="22">Saturday 11</li>
+          <li class="m out r-uk" data-t="25">Booked for Saturday 11:00am ✓ Oliver will meet you at the building.</li>
           <!-- shared events -->
           <li class="ev" data-t="41"><span>00:41</span> Lead saved to CRM · stage: Viewing booked</li>
           <li class="ev hot" data-t="57"><span>00:57</span> Hot-lead alert sent to your agent</li>
@@ -496,6 +504,7 @@
       <div class="seg" role="group" aria-label="Currency">
         <button type="button" data-set-cur="usd" aria-pressed="false">USD $</button>
         <button type="button" data-set-cur="aed" aria-pressed="true">AED</button>
+        <button type="button" data-set-cur="gbp" aria-pressed="false">GBP £</button>
       </div>
       <div class="seg" role="group" aria-label="Billing period">
         <button type="button" data-set-bill="m" aria-pressed="true">Monthly</button>

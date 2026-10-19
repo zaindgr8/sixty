@@ -59,6 +59,8 @@ td input{width:90px;background:#1a1a1b;color:var(--text);border:1px solid var(--
 .note{font-size:12px;color:var(--dim)}
 [hidden]{display:none!important}
 :focus-visible{outline:2px solid var(--red);outline-offset:2px}
+@keyframes syncPulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.4; transform:scale(1.25); } }
+.sync-pulse { animation: syncPulse 1.2s infinite ease-in-out; }
 @media (max-width:600px){ .stats{grid-template-columns:1fr 1fr 1fr} h1{font-size:22px} }
 </style>
 </head>
@@ -68,7 +70,13 @@ td input{width:90px;background:#1a1a1b;color:var(--text);border:1px solid var(--
   <header>
     <p class="kicker">Sixty · private tracker</p>
     <h1>100 clients by 1 January 2027</h1>
-    <p class="muted" style="margin:6px 0 0">Tick the day's tasks. Progress is saved in this browser.</p>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:6px">
+      <p class="muted" style="margin:0">Tick the day's tasks. Progress is saved directly to your database.</p>
+      <div id="sync-badge" style="display:inline-flex;align-items:center;gap:7px;font:500 11px var(--f-mono);padding:4px 11px;border-radius:999px;background:rgba(255,255,255,0.04);border:1px solid var(--line);color:var(--muted)">
+        <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:#3ee0a6;display:inline-block;transition:all .3s ease"></span>
+        <span id="sync-text">Connecting to database...</span>
+      </div>
+    </div>
     <div class="card" style="margin-top:16px">
       <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
         <b style="font-size:18px" id="overall">0 / 100 clients</b>
@@ -171,13 +179,95 @@ td input{width:90px;background:#1a1a1b;color:var(--text);border:1px solid var(--
   const GOAL = 100;
   const END = new Date('2027-01-01T00:00:00');
 
-  // ---- Storage (browser only, wrapped so a blocked store never breaks the page) ----
-  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
-  const save = (d) => { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} };
-  const data = load();
+  // ---- Storage: Supabase Database (with local storage as instant offline cache) ----
+  const loadLocal = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
+  const saveLocal = (d) => { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch {} };
+
+  const syncDot = $('sync-dot');
+  const syncText = $('sync-text');
+
+  function setSyncStatus(state, label) {
+    if (!syncDot || !syncText) return;
+    syncText.textContent = label;
+    syncDot.classList.remove('sync-pulse');
+    if (state === 'syncing') {
+      syncDot.style.background = '#f5a623';
+      syncDot.classList.add('sync-pulse');
+    } else if (state === 'saved') {
+      syncDot.style.background = '#3ee0a6';
+    } else if (state === 'loading') {
+      syncDot.style.background = '#60a5fa';
+      syncDot.classList.add('sync-pulse');
+    } else if (state === 'error') {
+      syncDot.style.background = '#e5484d';
+    } else {
+      syncDot.style.background = '#a3a3a3';
+    }
+  }
+
+  const data = loadLocal();
   data.days = data.days || {};       // { 'YYYY-MM-DD': { taskId: true } }
   data.clients = data.clients || {}; // { 'YYYY-MM-DD': number }
   data.weeks = data.weeks || WEEKS;
+
+  let saveTimer = null;
+  function scheduleSave(immediate = false, extraPayload = {}) {
+    saveLocal(data);
+    setSyncStatus('syncing', 'Saving to database...');
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => saveToDatabase(extraPayload), immediate ? 100 : 400);
+  }
+
+  async function saveToDatabase(extra = {}) {
+    try {
+      const res = await fetch('/api/tracker', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          days: data.days,
+          clients: data.clients,
+          weeks: data.weeks,
+          ...extra,
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      if (json && json.ok) {
+        setSyncStatus('saved', 'Synced to database');
+      } else {
+        throw new Error(json.error || 'Database save failed');
+      }
+    } catch (err) {
+      console.warn('Database sync issue:', err.message);
+      setSyncStatus('error', 'Saved locally · Database retry pending');
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => saveToDatabase(extra), 5000);
+    }
+  }
+
+  async function loadFromDatabase() {
+    setSyncStatus('loading', 'Connecting to database...');
+    try {
+      const res = await fetch('/api/tracker', { signal: AbortSignal.timeout(7000) });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      if (json && json.ok && json.data) {
+        data.days = json.data.days || {};
+        data.clients = json.data.clients || {};
+        if (Array.isArray(json.data.weeks) && json.data.weeks.length) {
+          data.weeks = json.data.weeks;
+        }
+        saveLocal(data);
+        renderAll();
+        setSyncStatus('saved', 'Synced to database');
+        return;
+      }
+      setSyncStatus('saved', 'Connected to database');
+    } catch (err) {
+      console.warn('Could not reach database, running from cached state:', err.message);
+      setSyncStatus('offline', 'Using local cache (offline)');
+    }
+  }
 
   const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   const todayKey = iso(new Date());
@@ -209,7 +299,8 @@ td input{width:90px;background:#1a1a1b;color:var(--text);border:1px solid var(--
       cb.addEventListener('change', () => {
         data.days[todayKey] = data.days[todayKey] || {};
         data.days[todayKey][task.id] = cb.checked;
-        save(data); renderAll();
+        scheduleSave(true);
+        renderAll();
       });
       const label = document.createElement('label');
       label.htmlFor = cb.id;
@@ -262,7 +353,10 @@ td input{width:90px;background:#1a1a1b;color:var(--text);border:1px solid var(--
     }).join('');
     $('weeks-table').innerHTML = `<tr><th>Week</th><th>Target</th><th>Actual</th><th>Status</th></tr>${rows}`;
     document.querySelectorAll('[data-week]').forEach((el) => el.addEventListener('change', () => {
-      data.weeks[+el.dataset.week] = Math.max(0, +el.value || 0); save(data); renderWeeks(); renderProgress();
+      data.weeks[+el.dataset.week] = Math.max(0, +el.value || 0);
+      scheduleSave(false);
+      renderWeeks();
+      renderProgress();
     }));
   }
 
@@ -295,14 +389,18 @@ td input{width:90px;background:#1a1a1b;color:var(--text);border:1px solid var(--
   // ---- Inputs ----
   $('clients').addEventListener('change', (e) => {
     data.clients[todayKey] = Math.max(0, Math.min(500, +e.target.value || 0));
-    save(data); renderAll();
+    scheduleSave(false);
+    renderAll();
   });
   $('reset-day').addEventListener('click', () => {
     if (!confirm('Clear today’s ticks?')) return;
-    delete data.days[todayKey]; save(data); renderAll();
+    delete data.days[todayKey];
+    scheduleSave(true, { resetDay: todayKey, days: { [todayKey]: null } });
+    renderAll();
   });
 
   renderAll();
+  loadFromDatabase();
 })();
 </script>
 </body>

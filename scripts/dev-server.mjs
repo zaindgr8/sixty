@@ -9,6 +9,7 @@ import { handleContact } from '../lib/contact.mjs';
 import { handleVoiceCall } from '../lib/voice.mjs';
 import { handleWaChat } from '../lib/wa-chat.mjs';
 import { handleLeadExtract } from '../lib/lead-extract.mjs';
+import { getTracker, updateTracker } from '../lib/tracker.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const PORT = Number(process.env.PORT || 4173);
@@ -91,9 +92,24 @@ createServer(async (req, res) => {
     return json(res, status, out);
   }
 
+  if (url.pathname === '/api/tracker') {
+    if (req.method === 'GET') {
+      const { status, body: out } = await getTracker();
+      return json(res, status, out);
+    }
+    if (req.method === 'POST') {
+      let body = {};
+      try { body = JSON.parse(await readBody(req, 100_000)); } catch { return json(res, 400, { ok: false, error: 'Bad JSON' }); }
+      const { status, body: out } = await updateTracker(body);
+      return json(res, status, out);
+    }
+    return json(res, 405, { ok: false, error: 'Method not allowed' });
+  }
+
   // Static files only from this folder, never server code or secrets.
   let path = normalize(decodeURIComponent(url.pathname)).replace(/^(\.\.[/\\])+/, '');
   if (path.endsWith('/')) path += 'index.html';
+  if (!extname(path) && existsSync(join(ROOT, path + '.html'))) path += '.html';
   const file = join(ROOT, path);
   if (!file.startsWith(ROOT) || !PUBLIC.has(extname(file)) || /[/\\](lib|api|scripts|agents|node_modules)[/\\]/.test(file)) {
     res.writeHead(404); return res.end('Not found');
