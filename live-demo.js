@@ -6,6 +6,17 @@
   const root = $('#crm');
   if (!root) return;
 
+  // ---- Dutch labels for the CRM panel (used when the page language is nl) ----
+  const NL_LABELS = {
+    'Name': 'Naam', 'Company': 'Bedrijf', 'Industry': 'Branche', 'Location': 'Locatie',
+    'Lead sources': 'Leadbronnen', 'Monthly leads': 'Leads per maand', 'CRM': 'CRM', 'Main pain': 'Grootste knelpunt',
+    'Interested in': 'Interesse in', 'Demo meeting': 'Demo-afspraak', 'Email': 'E-mail', 'Next step': 'Volgende stap',
+    'New': 'Nieuw', 'Qualified': 'Gekwalificeerd', 'Booked': 'Geboekt', 'Won': 'Gewonnen',
+    'Activity': 'Activiteit', 'Needs human': 'Mens nodig', 'Your reply time': 'Jouw reactietijd',
+    'Inbox': 'Inbox', 'Your lead': 'Jouw lead', 'Pipeline': 'Pipeline', 'Calls': 'Gesprekken', 'Analytics': 'Analyse',
+  };
+  const tr = (text) => (document.documentElement.dataset.lang === 'nl' && NL_LABELS[text]) || text;
+
   // ---- tiny DOM helper (always textContent, never innerHTML for user/AI text) ----
   function h(tag, attrs = {}, ...kids) {
     const el = document.createElement(tag);
@@ -74,7 +85,7 @@
         const list = all.filter((c) => c.stage === stage);
         const base = { New: 24, Qualified: 18, Booked: 11, Won: 6 }[stage];
         return h('div', { class: 'p-col', 'data-stage': stage, ondragover: (e) => { e.preventDefault(); e.currentTarget.classList.add('over'); }, ondragleave: (e) => e.currentTarget.classList.remove('over'), ondrop: (e) => drop(e, stage) },
-          h('h4', {}, stage, h('i', {}, String(base + list.filter((c) => c.you).length))),
+          h('h4', {}, tr(stage), h('i', {}, String(base + list.filter((c) => c.you).length))),
           list.map((c) => h('div', { class: `p-card${c.hot ? ' hot' : ''}${c.won ? ' won' : ''}${c.you ? ' you' : ''}${c.you && state.needsHuman ? ' human' : ''}`, draggable: 'true', 'data-id': c.id, ondragstart: (e) => { e.dataTransfer.setData('text/plain', c.id); e.currentTarget.classList.add('drag'); }, ondragend: (e) => e.currentTarget.classList.remove('drag'), onclick: c.you ? () => go('lead') : null },
             c.you ? h('em', { class: 'you-tag' }, state.needsHuman ? 'Needs human' : 'You · live') : null,
             h('b', {}, c.name), h('span', {}, c.detail))));
@@ -88,9 +99,9 @@
         h('div', { class: 'lead-top' },
           h('span', { class: 'lead-av' }, (L.lead_name || '?').slice(0, 1).toUpperCase()),
           h('div', {}, h('b', {}, L.lead_name || 'New lead'), h('small', {}, [L.company, L.location].filter(Boolean).join(' · ') || `${channelLabel()} · just now`)),
-          h('span', { class: `stage-pill s-${(L.stage || 'New').replace(/\s/g, '')}` }, state.needsHuman ? 'Needs human' : L.stage || 'New')),
-        h('dl', { class: 'lead-fields' }, FIELDS.map(([k, label]) => h('div', { class: L[k] ? 'on' : '' }, h('dt', {}, label), h('dd', {}, L[k] || '—')))),
-        h('div', { class: 'lead-log' }, h('h4', {}, 'Activity'), h('ol', {}, state.events.slice(0, 8).map((e) => h('li', {}, h('time', {}, e.at), e.text)))));
+          h('span', { class: `stage-pill s-${(L.stage || 'New').replace(/\s/g, '')}` }, state.needsHuman ? tr('Needs human') : tr(L.stage || 'New'))),
+        h('dl', { class: 'lead-fields' }, FIELDS.map(([k, label]) => h('div', { class: L[k] ? 'on' : '' }, h('dt', {}, tr(label)), h('dd', {}, L[k] || '—')))),
+        h('div', { class: 'lead-log' }, h('h4', {}, tr('Activity')), h('ol', {}, state.events.slice(0, 8).map((e) => h('li', {}, h('time', {}, e.at), e.text)))));
     },
 
     inbox() {
@@ -260,7 +271,7 @@
     const t0 = performance.now();
     setTimeout(() => busy && typing(true), 350);
     try {
-      const res = await fetch('/api/wa-chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ history: state.history.slice(-40), conversationId: state.conversationId, startedAt: state.startedAt }) });
+      const res = await fetch('/api/wa-chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ history: state.history.slice(-40), conversationId: state.conversationId, startedAt: state.startedAt, lang: document.documentElement.dataset.lang || 'en' }) });
       const out = await res.json().catch(() => ({}));
       if (!res.ok || !out.ok) throw new Error(out.error || 'Freya is having trouble replying. Please try again.');
       const ms = performance.now() - t0;

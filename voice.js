@@ -188,7 +188,10 @@ const engine = (() => {
       level();
       if (out) stopAmbience = startAmbience(out.ctx);
       limitTimer = setTimeout(() => stop('That’s the end of the demo call. Thanks for talking to Freya!'), MAX_CALL_MS);
-      ws.send(JSON.stringify({ clientContent: { turns: [{ role: 'user', parts: [{ text: '(The visitor just joined the call from the Sixty website. Greet them warmly and briefly as "Freya from Sixty" and ask who you are speaking with.)' }] }], turnComplete: true } }));
+      const greet = document.documentElement.dataset.lang === 'nl'
+        ? '(De bezoeker is zojuist het gesprek gestart vanaf de Sixty-website. Begroet hem of haar kort en warm in het Nederlands als Freya van Sixty en vraag met wie je spreekt.)'
+        : '(The visitor just joined the call from the Sixty website. Greet them warmly and briefly as "Freya from Sixty" and ask who you are speaking with.)';
+      ws.send(JSON.stringify({ clientContent: { turns: [{ role: 'user', parts: [{ text: greet }] }], turnComplete: true } }));
       return;
     }
     const sc = m.serverContent;
@@ -248,7 +251,7 @@ const engine = (() => {
     }
     out?.ctx.resume().catch(() => {});
     try {
-      const res = await fetch('/api/voice-call', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      const res = await fetch('/api/voice-call', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lang: document.documentElement.dataset.lang || 'en' }) });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.token) throw new Error(data.error || "We couldn't start the call. Please try again.");
       ws = new WebSocket(`${WS_URL}?access_token=${encodeURIComponent(data.token)}`);

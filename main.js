@@ -4,6 +4,7 @@ const PRICES = {
   usd: { sym: '$', starter: [149, 124], growth: [299, 249], scale: [599, 499], setup: 499 },
   aed: { sym: 'AED ', starter: [549, 459], growth: [1099, 919], scale: [2199, 1835], setup: 1835 },
   gbp: { sym: '£', starter: [119, 99], growth: [239, 199], scale: [479, 399], setup: 399 },
+  eur: { sym: '€', starter: [139, 116], growth: [279, 233], scale: [559, 466], setup: 459 },
 };
 
 const root = document.documentElement;
@@ -69,16 +70,18 @@ const store = {
 
 // ---- Currency ($ / AED / £) + billing ----
 // Currency drives everything: prices, and which hero chat script shows (AED→UAE, $→USA, £→UK).
-const CUR_REGION = { aed: 'uae', usd: 'usa', gbp: 'uk' };
+const CUR_REGION = { aed: 'uae', usd: 'usa', gbp: 'uk', eur: 'uk' };
 const state = { region: 'uae', cur: 'aed', bill: 'm' };
 const fmt = (n) => n.toLocaleString('en-US');
 
 function guessCurrency() {
   const saved = store.get('sm-cur');
   if (PRICES[saved]) return saved;
+  if (document.documentElement.dataset.lang === 'nl') return 'eur';
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
   if (/^Asia\/(Dubai|Muscat|Qatar|Bahrain|Kuwait|Riyadh)$/.test(tz)) return 'aed';
   if (/^Europe\/(London|Belfast|Guernsey|Isle_of_Man|Jersey)$/.test(tz)) return 'gbp';
+  if (/^Europe\/(Amsterdam|Brussels|Berlin|Paris|Madrid|Rome|Vienna|Lisbon|Dublin|Luxembourg)$/.test(tz)) return 'eur';
   return 'usd';
 }
 
@@ -92,9 +95,10 @@ function renderPrices() {
   });
   $$('[data-billed]').forEach((el) => {
     const k = el.dataset.billed;
+    const nl = document.documentElement.dataset.lang === 'nl';
     el.textContent = state.bill === 'y'
-      ? `${p.sym}${fmt(p[k][0] * 10)} billed yearly`
-      : 'Billed monthly · cancel anytime';
+      ? `${p.sym}${fmt(p[k][0] * 10)} ${nl ? 'per jaar gefactureerd' : 'billed yearly'}`
+      : (nl ? 'Maandelijks gefactureerd · opzegbaar wanneer je wilt' : 'Billed monthly · cancel anytime');
   });
   $$('[data-set-cur]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.setCur === state.cur)));
   $$('[data-set-bill]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.setBill === state.bill)));

@@ -17,7 +17,7 @@ Current time in Dubai: {{current_time_Asia/Dubai}}.
 
 ## What Sixty is (your product knowledge)
 Slogan: "Never type 'sorry for the late reply' again."
-Sixty answers every lead in under sixty seconds, day or night. It replies like a business's best salesperson, qualifies the lead, books the next step and updates the CRM before a competitor even sees the message.
+Sixty qualifies every lead in under sixty seconds, day or night. It replies like a business's best salesperson, asks the right questions, books the next step and updates the CRM before a competitor even sees the message.
 
 The first sixty seconds of a lead with Sixty:
 - Second zero: a lead comes in from WhatsApp, a missed call, a property portal, a Meta or Google lead form, or the website.
