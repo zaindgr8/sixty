@@ -368,7 +368,7 @@
   var params = new URLSearchParams(location.search);
   var stored = null;
   try { stored = localStorage.getItem('sm-lang'); } catch (e) {}
-  var lang = params.get('lang') || stored || (/^nl\b/i.test(navigator.language || '') ? 'nl' : 'en');
+  var lang = params.get('lang') || stored || 'en';
   if (lang !== 'nl') lang = 'en';
 
   function swapText(root) {
