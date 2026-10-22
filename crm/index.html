@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Sixty Leads CRM</title>
+<meta name="theme-color" content="#0A0A0B">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Doto:wght@700;900&family=Lexend:wght@500;600;700&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  /* Sixty by DevMate (sixty.devmatesolutions.com) — dark, instrument-like, DevMate red accent */
+  --bg: #0a0a0b; --bg-2: #121213; --panel: rgba(255,255,255,.025); --panel-solid: #111112;
+  --line: rgba(255,255,255,.08); --line-2: rgba(255,255,255,.14);
+  --ink: #f2f2f2; --muted: #a3a3a3; --dim: #6e6e6e;
+  --brand: #e5484d; --brand-2: #ff8a8c; --brand-ink: #ffffff; --brand-soft: rgba(229,72,77,.14);
+  --live: #3ee0a6; --hot: #ffb547;
+  --c1: #e5484d; --c2: #3ee0a6; --c3: #ffb547; --bad: #ff6b6f; --good: #3ee0a6; --warn: #ffb547;
+  --f-display: "Lexend", "Geist", ui-sans-serif, system-ui, sans-serif;
+  --f-body: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --f-dot: "Doto", "Geist Mono", ui-monospace, monospace;
+  --radius: 16px; --ease: cubic-bezier(.2,.7,.1,1);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.55 var(--f-body); -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 64px 64px; opacity: .35;
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%); mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%); }
+body::after { content: ""; position: fixed; left: 50%; top: -30vh; width: 120vw; height: 90vh; transform: translateX(-50%); z-index: -1; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(229,72,77,.18), transparent 70%); filter: blur(20px); }
+a { color: var(--brand-2); }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 600; letter-spacing: -.025em; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; border-radius: 6px; }
+.hidden { display: none !important; }
+
+/* Brand */
+.logo { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -.02em; font-size: 16px; white-space: nowrap; }
+.mark { width: 24px; height: 24px; color: var(--brand); display: inline-grid; }
+.mark svg { width: 100%; height: 100%; animation: spin 6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .mark svg { animation: none; } }
+.by { font: 500 11px var(--f-mono); color: var(--muted); padding-left: 12px; border-left: 1px solid var(--line-2); letter-spacing: .04em; }
+
+/* Login */
+.login { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+.login-card { width: 100%; max-width: 380px; background: rgba(18,18,19,.8); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--line-2); border-radius: 20px; padding: 30px; box-shadow: 0 30px 80px -30px rgba(229,72,77,.35); }
+.eyebrow { font: 500 11px var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--brand-2); display: flex; align-items: center; gap: 10px; margin: 22px 0 8px; }
+.eyebrow::before { content: ""; width: 18px; height: 1px; background: currentColor; }
+.login-card h1 { font-size: 26px; margin: 0 0 4px; }
+.login-card p { margin: 0 0 18px; color: var(--muted); }
+label { display: block; font: 500 11px var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 14px 0 6px; }
+.input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--bg-2); outline: none; transition: border-color .2s, box-shadow .2s; }
+select option { background: var(--bg-2); }
+.input:focus, select:focus, textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-soft); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 16px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--panel); cursor: pointer; font-weight: 500; white-space: nowrap; transition: border-color .2s, box-shadow .2s, transform .2s var(--ease); }
+.btn:hover { border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-soft); }
+.btn.primary { background: var(--brand); border-color: transparent; color: #fff; box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset, 0 10px 30px -10px rgba(229,72,77,.7); }
+.btn.primary:hover { transform: translateY(-1px); box-shadow: 0 0 0 1px rgba(255,255,255,.14) inset, 0 16px 40px -12px rgba(229,72,77,.9); }
+.btn.danger { color: var(--bad); }
+.btn:disabled { opacity: .5; cursor: default; transform: none; box-shadow: none; }
+.btn.block { width: 100%; margin-top: 20px; padding: 12px 16px; }
+.err { color: var(--bad); font-size: 13px; margin-top: 10px; min-height: 18px; }
+
+/* Shell */
+header.top { position: sticky; top: 0; z-index: 10; background: rgba(10,10,11,.62); backdrop-filter: blur(14px) saturate(140%); -webkit-backdrop-filter: blur(14px) saturate(140%); border-bottom: 1px solid var(--line); }
+.top-inner { max-width: 1280px; margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; gap: 14px; }
+nav.tabs { display: inline-flex; padding: 3px; border: 1px solid var(--line-2); border-radius: 999px; background: var(--panel); margin-left: 8px; overflow-x: auto; }
+nav.tabs button { border: 0; background: none; padding: 6px 14px; border-radius: 999px; cursor: pointer; color: var(--muted); font: 500 12px var(--f-mono); transition: background .25s var(--ease), color .25s; }
+nav.tabs button.on { background: var(--ink); color: var(--bg); }
+.spacer { flex: 1; }
+main { max-width: 1280px; margin: 0 auto; padding: 24px 16px 60px; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; }
+.toolbar h2 { margin: 0; font-size: 26px; }
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+
+.grid { display: grid; gap: 12px; }
+.kpis { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; min-width: 0; }
+.kpi .label { font: 500 11px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.kpi .value { font-family: var(--f-dot); font-weight: 900; font-size: 34px; line-height: 1.15; margin-top: 4px; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+.kpi .value.bad { color: var(--bad); }
+.kpi .sub { font-size: 12px; color: var(--dim); }
+.two { grid-template-columns: 1fr 1fr; margin-top: 12px; }
+@media (max-width: 860px) { .two { grid-template-columns: 1fr; } .by { display: none; } }
+.card h3 { margin: 0 0 12px; font-size: 15px; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 500 11px var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--f-mono); font-size: 13px; }
+tbody tr:last-child td { border-bottom: 0; }
+.table-wrap { overflow-x: auto; }
+tr.click { cursor: pointer; }
+tr.click:hover td { background: rgba(255,255,255,.03); }
+.pill { display: inline-block; padding: 1px 9px; border-radius: 999px; font: 500 11px var(--f-mono); background: rgba(255,255,255,.04); border: 1px solid var(--line-2); color: var(--muted); white-space: nowrap; }
+.pill.good { color: var(--good); border-color: rgba(62,224,166,.35); background: rgba(62,224,166,.08); }
+.pill.bad { color: var(--bad); border-color: rgba(229,72,77,.4); background: var(--brand-soft); }
+.pill.warn { color: var(--warn); border-color: rgba(255,181,71,.35); background: rgba(255,181,71,.08); }
+.pill.brand { color: var(--brand-2); border-color: rgba(229,72,77,.4); background: var(--brand-soft); }
+.trunc { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.chart { width: 100%; height: 200px; display: block; }
+.legend { display: flex; gap: 14px; font: 500 11px var(--f-mono); color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.bar-row { display: grid; grid-template-columns: minmax(90px, 150px) 1fr 44px; gap: 12px; align-items: center; margin: 8px 0; font-size: 13px; }
+.bar-row .num { text-align: right; font-family: var(--f-mono); }
+.bar-track { height: 6px; background: rgba(255,255,255,.05); border-radius: 999px; overflow: hidden; }
+.bar-fill { height: 100%; background: linear-gradient(90deg, var(--brand), var(--brand-2)); border-radius: 999px; }
+
+.filters { display: grid; grid-template-columns: 2fr repeat(5, 1fr); gap: 8px; margin-bottom: 12px; }
+@media (max-width: 960px) { .filters { grid-template-columns: 1fr 1fr; } }
+.pager { display: flex; align-items: center; gap: 10px; justify-content: flex-end; margin-top: 12px; }
+
+/* Drawer */
+.drawer-bg { position: fixed; inset: 0; background: rgba(0,0,0,.6); backdrop-filter: blur(3px); z-index: 20; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(560px, 100%); background: var(--bg-2); z-index: 21; overflow-y: auto; border-left: 1px solid var(--line-2); padding: 22px; }
+.drawer h2 { margin: 0; font-size: 22px; }
+.kv { display: grid; grid-template-columns: 120px 1fr; gap: 8px 12px; font-size: 13px; margin: 16px 0; }
+.kv div:nth-child(odd) { color: var(--dim); font: 500 11px var(--f-mono); letter-spacing: .06em; text-transform: uppercase; padding-top: 2px; }
+.email-preview { border: 1px solid var(--line-2); border-radius: 12px; padding: 14px 16px; background: var(--panel); font-size: 13px; }
+.email-preview p { margin: 0 0 8px; }
+.timeline { list-style: none; padding: 0; margin: 0; font-size: 13px; }
+.timeline li { padding: 8px 0; border-bottom: 1px dashed var(--line); display: flex; justify-content: space-between; gap: 10px; }
+
+.drop { border: 1px dashed var(--line-2); border-radius: 16px; padding: 32px; text-align: center; background: var(--panel); cursor: pointer; transition: border-color .2s, box-shadow .2s; }
+.drop:hover, .drop.over { border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-soft); }
+.map-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 4px 14px; }
+.toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; z-index: 50; font-weight: 500; max-width: calc(100% - 32px); }
+.empty { text-align: center; color: var(--dim); padding: 30px 10px; }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<section id="loginView" class="login hidden">
+  <form class="login-card" id="loginForm" autocomplete="on">
+    <div class="logo"><span class="mark" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" stroke-width="2" opacity=".25"/><path d="M16 3a13 13 0 1 1-11.3 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="16" cy="16" r="2.6" fill="currentColor"/></svg></span>Sixty <span class="by">by DevMate</span></div>
+    <div class="eyebrow">Outreach · UK + USA</div>
+    <h1>Sign in</h1>
+    <p>Leads from Supabase</p>
+    <label for="u">Username</label>
+    <input class="input" id="u" name="username" autocomplete="username" required>
+    <label for="p">Password</label>
+    <input class="input" id="p" name="password" type="password" autocomplete="current-password" required>
+    <button class="btn primary block" id="loginBtn" type="submit">Sign in</button>
+    <div class="err" id="loginErr"></div>
+  </form>
+</section>
+
+<!-- ============ APP ============ -->
+<div id="appView" class="hidden">
+  <header class="top">
+    <div class="top-inner">
+      <div class="logo"><span class="mark" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" stroke-width="2" opacity=".25"/><path d="M16 3a13 13 0 1 1-11.3 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="16" cy="16" r="2.6" fill="currentColor"/></svg></span>Sixty <span class="by">Leads</span></div>
+      <nav class="tabs" id="tabs">
+        <button data-tab="leads" class="on">Leads</button>
+      </nav>
+      <div class="spacer"></div>
+      <button class="btn" id="refreshBtn" title="Refresh">Refresh</button>
+      <button class="btn" id="logoutBtn">Log out</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Leads -->
+    <section id="tab-leads" class="hidden">
+      <div class="toolbar"><h2>Leads</h2><span class="muted small" id="leadCount"></span><div class="spacer"></div><button class="btn" id="exportBtn">Export CSV</button></div>
+      <div class="filters">
+        <input class="input" id="fSearch" placeholder="Search name, email, company, title, industry">
+        <select id="fCountry"><option value="">All countries</option><option value="UK">UK</option><option value="USA">USA</option></select>
+        <select id="fStatus"><option value="">Any pipeline status</option></select>
+        <select id="fEmailStatus"><option value="">Any email status</option></select>
+        <select id="fEngagement"><option value="">Any engagement</option><option value="opened">Opened</option><option value="clicked">Clicked</option><option value="not_opened">Emailed, not opened</option></select>
+      </div>
+      <div class="card" style="padding:0">
+        <div class="table-wrap" id="leadsTable"></div>
+      </div>
+      <div class="pager"><span class="muted small" id="pageInfo"></span><button class="btn" id="prevPage">Previous</button><button class="btn" id="nextPage">Next</button></div>
+    </section>
+
+</main>
+</div>
+
+<!-- Lead drawer -->
+<div id="drawerBg" class="drawer-bg hidden"></div>
+<aside id="drawer" class="drawer hidden" aria-modal="true" role="dialog"></aside>
+<div id="toast" class="toast hidden"></div>
+
+<script>
+// ---- Config: publishable key only (safe in the browser). All data goes through dash_* functions that check the session. ----
+const SUPABASE_URL = 'https://fsopwsygsnuufwfylaiv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_V_ui2odaR5LZdDgpwElk3g_vgqNN4uU';
+
+const STATUSES = ['new', 'contacted', 'replied', 'interested', 'demo_booked', 'won', 'not_interested', 'lost'];
+const EMAIL_STATUSES = ['pending', 'sent', 'failed', 'invalid', 'bounced', 'complained', 'unsubscribed'];
+const PAGE = 50;
+
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmt = (n) => Number(n || 0).toLocaleString();
+const pct = (a, b) => b ? Math.round((a / b) * 1000) / 10 + '%' : '–';
+const label = (s) => String(s || '').replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase());
+const when = (d) => d ? new Date(d).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '–';
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage blocked */ } },
+  del(k) { try { localStorage.removeItem(k); } catch { /* storage blocked */ } },
+};
+
+let session = store.get('sixty_session');
+let state = { tab: 'leads', page: 0, total: 0, rows: [] };
+
+function toast(msg, ms = 2600) {
+  const t = $('#toast'); t.textContent = msg; t.classList.remove('hidden');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.add('hidden'), ms);
+}
+
+async function rpc(fn, args = {}) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+    method: 'POST',
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(args),
+  });
+  const text = await res.text();
+  let data = null; try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+  if (!res.ok) {
+    const msg = (data && (data.message || data.hint)) || `Request failed (${res.status})`;
+    if (/session expired|log in again/i.test(msg) && fn !== 'dash_login') { logout(true); }
+    throw new Error(msg);
+  }
+  return data;
+}
+const authed = (fn, args = {}) => rpc(fn, { p_token: session.token, ...args });
+
+// ---------------- Auth ----------------
+function showLogin() { $('#appView').classList.add('hidden'); $('#loginView').classList.remove('hidden'); $('#u').focus(); }
+function showApp() { $('#loginView').classList.add('hidden'); $('#appView').classList.remove('hidden'); switchTab(state.tab); }
+async function logout(expired) {
+  if (session && !expired) { try { await rpc('dash_logout', { p_token: session.token }); } catch { /* ignore */ } }
+  session = null; store.del('sixty_session'); showLogin();
+  if (expired) $('#loginErr').textContent = 'Your session expired. Please sign in again.';
+}
+$('#loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = $('#loginBtn'); btn.disabled = true; $('#loginErr').textContent = '';
+  try {
+    session = await rpc('dash_login', { p_username: $('#u').value, p_password: $('#p').value });
+    store.set('sixty_session', session); $('#p').value = ''; showApp();
+  } catch (err) { $('#loginErr').textContent = err.message; }
+  finally { btn.disabled = false; }
+});
+$('#logoutBtn').addEventListener('click', () => logout(false));
+
+// ---------------- Tabs ----------------
+function switchTab(tab) {
+  state.tab = tab;
+  $$('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  $$('main > section').forEach(s => s.classList.toggle('hidden', s.id !== 'tab-' + tab));
+  loadLeads();
+}
+$$('#tabs button').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
+$('#refreshBtn').addEventListener('click', () => switchTab(state.tab));
+
+// ---------------- Leads ----------------
+$('#fStatus').innerHTML += STATUSES.map(s => `<option value="${s}">${label(s)}</option>`).join('');
+$('#fEmailStatus').innerHTML += EMAIL_STATUSES.map(s => `<option value="${s}">${label(s)}</option>`).join('');
+let searchT;
+$('#fSearch').addEventListener('input', () => { clearTimeout(searchT); searchT = setTimeout(() => { state.page = 0; loadLeads(); }, 300); });
+['#fCountry', '#fStatus', '#fEmailStatus', '#fEngagement'].forEach(s => $(s).addEventListener('change', () => { state.page = 0; loadLeads(); }));
+$('#prevPage').addEventListener('click', () => { if (state.page > 0) { state.page--; loadLeads(); } });
+$('#nextPage').addEventListener('click', () => { if ((state.page + 1) * PAGE < state.total) { state.page++; loadLeads(); } });
+
+const leadFilters = () => ({
+  p_search: $('#fSearch').value || null, p_country: $('#fCountry').value || null, p_status: $('#fStatus').value || null,
+  p_email_status: $('#fEmailStatus').value || null, p_campaign: null, p_engagement: $('#fEngagement').value || null,
+});
+
+async function loadLeads() {
+  try {
+    const r = await authed('dash_leads', { ...leadFilters(), p_limit: PAGE, p_offset: state.page * PAGE });
+    state.total = r.total; state.rows = r.rows || [];
+    renderLeads();
+  } catch (err) { toast(err.message); }
+}
+const statusPill = (s) => `<span class="pill ${['interested', 'demo_booked', 'won', 'replied'].includes(s) ? 'good' : ['not_interested', 'lost'].includes(s) ? 'bad' : ''}">${label(s)}</span>`;
+const emailPill = (s) => `<span class="pill ${s === 'sent' ? 'brand' : ['bounced', 'invalid', 'complained', 'failed'].includes(s) ? 'bad' : s === 'unsubscribed' ? 'warn' : ''}">${label(s)}</span>`;
+function renderLeads() {
+  $('#leadCount').textContent = `${fmt(state.total)} leads`;
+  $('#pageInfo').textContent = state.total ? `${state.page * PAGE + 1}–${Math.min(state.total, (state.page + 1) * PAGE)} of ${fmt(state.total)}` : '';
+  $('#prevPage').disabled = state.page === 0; $('#nextPage').disabled = (state.page + 1) * PAGE >= state.total;
+  if (!state.rows.length) { $('#leadsTable').innerHTML = '<div class="empty">No leads match these filters.</div>'; return; }
+  $('#leadsTable').innerHTML = `<table><thead><tr><th>Name</th><th>Company</th><th>Industry</th><th>Country</th><th>Status</th><th>Email</th><th class="num">Opens</th><th class="num">Clicks</th><th>Last emailed</th></tr></thead><tbody>${state.rows.map((r, i) => `<tr class="click" data-i="${i}">
+      <td><div class="trunc"><strong>${esc(r.full_name || [r.first_name, r.last_name].filter(Boolean).join(' ') || '–')}</strong></div><div class="trunc small muted">${esc(r.email)}</div></td>
+      <td><div class="trunc">${esc(r.company || '–')}</div><div class="trunc small muted">${esc(r.job_title || '')}</div></td>
+      <td class="trunc">${esc(r.industry || '–')}</td><td>${esc(r.country || '–')}</td>
+      <td>${statusPill(r.status)}</td><td>${emailPill(r.email_status)}</td>
+      <td class="num">${fmt(r.open_count)}</td><td class="num">${fmt(r.click_count)}</td><td class="small">${when(r.last_emailed_at)}</td></tr>`).join('')}</tbody></table>`;
+  $$('#leadsTable tr.click').forEach(tr => tr.addEventListener('click', () => openLead(state.rows[Number(tr.dataset.i)])));
+}
+
+$('#exportBtn').addEventListener('click', async () => {
+  try {
+    const r = await authed('dash_leads', { ...leadFilters(), p_limit: 500, p_offset: 0 });
+    const cols = ['email', 'first_name', 'last_name', 'job_title', 'company', 'company_website', 'industry', 'city', 'state', 'country', 'status', 'email_status', 'open_count', 'click_count', 'last_emailed_at', 'email_subject', 'notes'];
+    const q = (v) => { const s = Array.isArray(v) ? v.join('; ') : String(v ?? ''); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const csv = [cols.join(',')].concat((r.rows || []).map(row => cols.map(c => q(row[c])).join(','))).join('\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = `sixty-leads-${new Date().toISOString().slice(0, 10)}.csv`; a.click(); URL.revokeObjectURL(a.href);
+    if (r.total > 500) toast('Exported the first 500 leads. Narrow the filters to export the rest.');
+  } catch (err) { toast(err.message); }
+});
+
+// ---------------- Lead drawer ----------------
+function closeDrawer() { $('#drawer').classList.add('hidden'); $('#drawerBg').classList.add('hidden'); }
+$('#drawerBg').addEventListener('click', closeDrawer);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+
+async function openLead(r) {
+  const d = $('#drawer');
+  const name = r.full_name || [r.first_name, r.last_name].filter(Boolean).join(' ') || r.email;
+  d.innerHTML = `
+    <div style="display:flex;align-items:flex-start;gap:10px">
+      <div style="flex:1;min-width:0"><h2>${esc(name)}</h2><div class="muted">${esc(r.job_title || '')}${r.job_title && r.company ? ' · ' : ''}${esc(r.company || '')}</div></div>
+      <button class="btn" id="dClose">Close</button>
+    </div>
+    <div class="kv">
+      <div>Email</div><div><a href="mailto:${esc(r.email)}">${esc(r.email)}</a></div>
+      <div>Website</div><div>${r.company_website ? `<a href="${esc(/^https?:/.test(r.company_website) ? r.company_website : 'https://' + r.company_website)}" target="_blank" rel="noopener">${esc(r.company_website)}</a>` : '–'}</div>
+      <div>LinkedIn</div><div>${r.linkedin_url ? `<a href="${esc(r.linkedin_url)}" target="_blank" rel="noopener">Profile</a>` : '–'}</div>
+      <div>Location</div><div>${esc([r.city, r.state, r.country].filter(Boolean).join(', ') || '–')}</div>
+      <div>Industry</div><div>${esc(r.industry || '–')}</div>
+      <div>Email status</div><div>${emailPill(r.email_status)} ${r.last_email_error ? `<span class="small muted">${esc(r.last_email_error)}</span>` : ''}</div>
+      <div>Engagement</div><div>${fmt(r.open_count)} opens · ${fmt(r.click_count)} clicks</div>
+      <div>Campaigns</div><div>${(r.custom_campaigns_sent || []).map(c => `<span class="pill">${esc(c.replace(/^sixty:/, ''))}</span>`).join(' ') || '–'}</div>
+      <div>Source</div><div>${esc(r.source || '–')} ${(r.tags || []).map(t => `<span class="pill">${esc(t)}</span>`).join(' ')}</div>
+    </div>
+    <label for="dStatus">Pipeline status</label>
+    <select id="dStatus">${STATUSES.map(s => `<option value="${s}" ${s === r.status ? 'selected' : ''}>${label(s)}</option>`).join('')}</select>
+    <label for="dPers">Personalisation (the AI uses this in the next email)</label>
+    <textarea id="dPers" rows="2" placeholder="e.g. Just opened a second office in Manchester; heavy Rightmove advertiser">${esc(r.personalization || '')}</textarea>
+    <label for="dNotes">Notes (internal)</label>
+    <textarea id="dNotes" rows="3">${esc(r.notes || '')}</textarea>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <button class="btn primary" id="dSave">Save</button>
+      ${r.unsubscribed ? '<span class="pill warn">Do not email</span>' : '<button class="btn danger" id="dDne">Do not email</button>'}
+    </div>
+    <h3 style="margin-top:22px">Last email sent</h3>
+    ${r.email_subject ? `<div class="email-preview"><div class="small muted">${when(r.last_emailed_at)}</div><p><strong>${esc(r.email_subject)}</strong></p>${sanitizeEmail(r.last_email_body)}</div>` : '<div class="muted">Nothing sent yet.</div>'}
+    <h3 style="margin-top:22px">Activity</h3>
+    <ul class="timeline" id="dEvents"><li class="muted">Loading…</li></ul>`;
+  $('#drawerBg').classList.remove('hidden'); d.classList.remove('hidden');
+  $('#dClose').addEventListener('click', closeDrawer);
+  $('#dSave').addEventListener('click', () => saveLead(r.id, { status: $('#dStatus').value, personalization: $('#dPers').value, notes: $('#dNotes').value }));
+  if ($('#dDne')) $('#dDne').addEventListener('click', () => { if (confirm('Never email this lead again?')) saveLead(r.id, { do_not_email: true }); });
+  try {
+    const ev = await authed('dash_lead_events', { p_lead_id: r.id });
+    $('#dEvents').innerHTML = ev.length ? ev.map(e => `<li><span>${label(e.event)}${e.link ? ` <span class="small muted trunc">${esc(e.link)}</span>` : ''}${e.reason ? ` <span class="small muted">${esc(e.reason)}</span>` : ''}</span><span class="small muted">${when(e.event_at)}</span></li>`).join('') : '<li class="muted">No email events yet.</li>';
+  } catch (err) { $('#dEvents').innerHTML = `<li class="muted">${esc(err.message)}</li>`; }
+}
+// Only allow the tags the AI is allowed to produce
+function sanitizeEmail(html) {
+  const tmp = document.createElement('div'); tmp.innerHTML = String(html || '');
+  tmp.querySelectorAll('*').forEach(el => { if (!['P', 'STRONG', 'EM', 'B', 'I', 'BR', 'UL', 'LI'].includes(el.tagName)) el.replaceWith(...el.childNodes); else [...el.attributes].forEach(a => el.removeAttribute(a.name)); });
+  return tmp.innerHTML;
+}
+async function saveLead(id, patch) {
+  try {
+    const updated = await authed('dash_update_lead', { p_id: id, p_patch: patch });
+    toast('Saved'); closeDrawer();
+    const i = state.rows.findIndex(x => x.id === id); if (i >= 0) state.rows[i] = { ...state.rows[i], ...updated };
+    renderLeads();
+  } catch (err) { toast(err.message); }
+}
+
+// ---------------- Boot ----------------
+if (session && session.token && new Date(session.expires_at) > new Date()) showApp(); else { session = null; showLogin(); }
+</script>
+</body>
+</html>
