@@ -366,9 +366,8 @@
 };
   var root = document.documentElement;
   var params = new URLSearchParams(location.search);
-  var stored = null;
-  try { stored = localStorage.getItem('sm-lang'); } catch (e) {}
-  var lang = params.get('lang') || stored || 'en';
+  // English is always the primary language; Dutch only via explicit ?lang=nl
+  var lang = params.get('lang') || 'en';
   if (lang !== 'nl') lang = 'en';
 
   function swapText(root) {

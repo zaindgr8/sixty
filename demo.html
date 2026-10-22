@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="nl" data-lang="nl" data-scenario="outbound">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Demo: uitgaand gesprek met Freya</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="demo-page">
+<main class="demo">
+  <p class="demo-kicker">Demo · Voorbeeld Energie</p>
+  <h1>Freya belt je terug</h1>
+  <p class="demo-sub">Klik op de bubble. Freya belt en vraag je naam en telefoonnummer, zodat een adviseur je later kan bereiken. Dit is een fictief bedrijf.</p>
+
+  <dl class="demo-card" aria-live="polite">
+    <div><dt>Naam</dt><dd id="d-name">—</dd></div>
+    <div><dt>Telefoon</dt><dd id="d-phone">—</dd></div>
+  </dl>
+  <p class="demo-note">Gebruikt je microfoon. Het gesprek kan worden opgenomen om de kwaliteit te verbeteren.</p>
+</main>
+
+<div class="vdemo" id="vdemo">
+  <button type="button" class="orb" id="orb" aria-pressed="false" aria-label="Praat met Freya, live">
+    <span class="orb-ring" aria-hidden="true"></span>
+    <span class="orb-ring r2" aria-hidden="true"></span>
+    <span class="orb-core" aria-hidden="true">
+      <svg class="orb-mic" viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span class="orb-bars"><i></i><i></i><i></i><i></i></span>
+    </span>
+  </button>
+  <span class="orb-label" id="orb-label" aria-live="polite">Praat met Freya <em>live</em></span>
+</div>
+
+<script>
+  addEventListener('sixty:voice', ({ detail: d }) => {
+    if (d.type === 'contact') {
+      document.getElementById('d-name').textContent = d.args?.name || '—';
+      document.getElementById('d-phone').textContent = d.args?.phone || '—';
+    }
+  });
+</script>
+<script src="voice.js" type="module"></script>
+</body>
+</html>

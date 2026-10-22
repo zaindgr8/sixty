@@ -5,7 +5,7 @@
 //
 // The engine announces everything on window as 'sixty:voice' events, detail.type is one of:
 //   phase {phase: idle|connecting|live, message?} · level {lvl} · user {text} · agent {text}
-//   turn {} (Freya finished speaking) · booked {args}
+//   turn {} (Freya finished speaking) · contact {args} (outbound /demo only) · booked {args}
 
 const WS_URL = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained';
 const MAX_CALL_MS = 10 * 60_000;
@@ -43,8 +43,21 @@ registerProcessor('pcm16', Pcm16);`;
 // Generated in the browser (no audio files). It plays straight to the speakers, so it doesn't move the orb.
 const AMBIENCE_VOLUME = 1; // 0 turns it off; 1.5 is noticeably busier
 
-function startAmbience(ctx) {
+// Makes the agent sound like a real phone line: narrow band and light compression (/demo only).
+function phoneLine(ctx) {
+  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 320;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3400;
+  const curve = new Float32Array(1024);
+  for (let i = 0; i < curve.length; i++) { const x = (i * 2) / curve.length - 1; curve[i] = Math.tanh(2 * x) / Math.tanh(2); }
+  const shaper = ctx.createWaveShaper(); shaper.curve = curve;
+  hp.connect(lp).connect(shaper).connect(ctx.destination);
+  return hp;
+}
+
+// scene 'office' (main site) or 'street' (/demo: the caller is outside, traffic rumble, no office chatter)
+function startAmbience(ctx, scene = 'office') {
   if (!AMBIENCE_VOLUME) return () => {};
+  const street = scene === 'street';
   const master = ctx.createGain();
   master.gain.setValueAtTime(0, ctx.currentTime);
   master.gain.linearRampToValueAtTime(AMBIENCE_VOLUME, ctx.currentTime + 1.5); // fade in
@@ -65,8 +78,8 @@ function startAmbience(ctx) {
 
   // 1. Room tone / air conditioning
   const room = loop(noise(4, true));
-  const roomLp = ctx.createBiquadFilter(); roomLp.type = 'lowpass'; roomLp.frequency.value = 700;
-  const roomGain = ctx.createGain(); roomGain.gain.value = 0.05;
+  const roomLp = ctx.createBiquadFilter(); roomLp.type = 'lowpass'; roomLp.frequency.value = street ? 260 : 700;
+  const roomGain = ctx.createGain(); roomGain.gain.value = street ? 0.09 : 0.05;
   room.connect(roomLp).connect(roomGain).connect(master);
 
   // 2. Distant chatter: voice-band noise whose loudness drifts like people talking across the office
@@ -74,7 +87,7 @@ function startAmbience(ctx) {
   const chatBp = ctx.createBiquadFilter(); chatBp.type = 'bandpass'; chatBp.frequency.value = 520; chatBp.Q.value = 1.4;
   const chatGain = ctx.createGain(); chatGain.gain.value = 0.006;
   chat.connect(chatBp).connect(chatGain).connect(master);
-  const chatter = setInterval(() => {
+  const chatter = street ? null : setInterval(() => {
     const t = ctx.currentTime;
     chatGain.gain.linearRampToValueAtTime(0.002 + Math.random() * 0.012, t + 0.25);
     chatBp.frequency.linearRampToValueAtTime(380 + Math.random() * 400, t + 0.25);
@@ -98,7 +111,7 @@ function startAmbience(ctx) {
     for (let i = 0; i < keys; i++) { t += 0.07 + Math.random() * 0.12; click(t, 0.012 + Math.random() * 0.016); }
     typingTimer = setTimeout(typingBurst, 3500 + Math.random() * 9000);
   };
-  typingTimer = setTimeout(typingBurst, 2000);
+  if (!street) typingTimer = setTimeout(typingBurst, 2000);
 
   return () => {
     clearInterval(chatter);
@@ -136,7 +149,7 @@ const engine = (() => {
     const ctx = new AudioContext({ sampleRate: 24000 });
     const analyser = ctx.createAnalyser();
     analyser.fftSize = 512;
-    analyser.connect(ctx.destination);
+    analyser.connect(document.documentElement.dataset.scenario === 'outbound' ? phoneLine(ctx) : ctx.destination);
     out = { ctx, analyser, nextAt: 0, sources: new Set() };
   }
 
@@ -186,9 +199,12 @@ const engine = (() => {
     if (m.setupComplete) {
       setPhase('live');
       level();
-      if (out) stopAmbience = startAmbience(out.ctx);
+      if (out) stopAmbience = startAmbience(out.ctx, document.documentElement.dataset.scenario === 'outbound' ? 'street' : 'office');
       limitTimer = setTimeout(() => stop('That’s the end of the demo call. Thanks for talking to Freya!'), MAX_CALL_MS);
-      const greet = document.documentElement.dataset.lang === 'nl'
+      const outbound = document.documentElement.dataset.scenario === 'outbound';
+      const greet = outbound
+        ? '(Je belt de bezoeker terug die op de demo-bubble heeft geklikt. Begroet kort in het Nederlands als Freya van Voorbeeld Energie en vraag of het een goed moment is.)'
+        : document.documentElement.dataset.lang === 'nl'
         ? '(De bezoeker is zojuist het gesprek gestart vanaf de Sixty-website. Begroet hem of haar kort en warm in het Nederlands als Freya van Sixty en vraag met wie je spreekt.)'
         : '(The visitor just joined the call from the Sixty website. Greet them warmly and briefly as "Freya from Sixty" and ask who you are speaking with.)';
       ws.send(JSON.stringify({ clientContent: { turns: [{ role: 'user', parts: [{ text: greet }] }], turnComplete: true } }));
@@ -205,7 +221,8 @@ const engine = (() => {
     if (m.toolCall?.functionCalls) {
       const responses = [];
       for (const fc of m.toolCall.functionCalls) {
-        responses.push({ id: fc.id, name: fc.name, response: fc.name === 'book_demo' ? await bookDemo(fc.args || {}) : { error: 'Unknown tool' } });
+        if (fc.name === 'save_contact') emit('contact', { args: fc.args || {} });
+        responses.push({ id: fc.id, name: fc.name, response: fc.name === 'book_demo' ? await bookDemo(fc.args || {}) : fc.name === 'save_contact' ? { result: 'Saved' } : { error: 'Unknown tool' } });
       }
       ws?.send(JSON.stringify({ toolResponse: { functionResponses: responses } }));
     }
@@ -251,7 +268,7 @@ const engine = (() => {
     }
     out?.ctx.resume().catch(() => {});
     try {
-      const res = await fetch('/api/voice-call', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lang: document.documentElement.dataset.lang || 'en' }) });
+      const res = await fetch('/api/voice-call', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lang: document.documentElement.dataset.lang || 'en', scenario: document.documentElement.dataset.scenario || '' }) });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.token) throw new Error(data.error || "We couldn't start the call. Please try again.");
       ws = new WebSocket(`${WS_URL}?access_token=${encodeURIComponent(data.token)}`);
@@ -287,59 +304,43 @@ const engine = (() => {
 })();
 window.sixtyVoice = engine;
 
-// ---- Floating orb UI ----
+// ---- Floating orb: one bubble. Click to start, click again to end. ----
 (() => {
-  const $ = (id) => document.getElementById(id);
-  const wrap = $('vdemo');
+  const wrap = document.getElementById('vdemo');
   if (!wrap) return;
-  const orb = $('orb'), panel = $('vpanel'), idle = $('vp-idle'), live = $('vp-live');
-  const startBtn = $('vp-start'), stateEl = $('vp-state'), timerEl = $('vp-timer'), errEl = $('vp-err'), capEl = $('vp-caption');
-  let tick = null, startedAt = 0, caption = '';
+  const orb = document.getElementById('orb'), label = document.getElementById('orb-label');
+  const idleHTML = label.innerHTML;
+  let tick = null, startedAt = 0;
 
-  function open(show) {
-    panel.hidden = !show;
-    orb.setAttribute('aria-expanded', String(show));
-    wrap.classList.toggle('open', show);
-    if (show && engine.phase === 'idle') setTimeout(() => startBtn.focus(), 50);
-  }
+  const show = (text) => { label.textContent = text; label.classList.add('show'); };
+  const clock = () => {
+    const s = Math.floor((Date.now() - startedAt) / 1000);
+    return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+  };
 
   addEventListener('sixty:voice', ({ detail: d }) => {
     if (d.type === 'phase') {
       wrap.dataset.phase = d.phase;
-      idle.hidden = d.phase !== 'idle';
-      live.hidden = d.phase === 'idle';
-      startBtn.disabled = d.phase !== 'idle';
-      if (d.phase === 'connecting') { errEl.textContent = ''; capEl.textContent = ''; stateEl.textContent = 'Connecting to Freya…'; }
+      orb.setAttribute('aria-pressed', String(d.phase !== 'idle'));
+      if (d.phase === 'connecting') show('Connecting…');
       if (d.phase === 'live') {
         startedAt = Date.now();
-        tick = setInterval(() => {
-          const s = Math.floor((Date.now() - startedAt) / 1000);
-          timerEl.textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-        }, 500);
+        show(`Live · ${clock()}`);
+        tick = setInterval(() => show(`Live · ${clock()}`), 500);
       }
-      if (d.phase === 'idle') { clearInterval(tick); timerEl.textContent = '00:00'; errEl.textContent = d.message || ''; }
+      if (d.phase === 'idle') {
+        clearInterval(tick);
+        label.innerHTML = idleHTML;
+        if (d.message) show(d.message);
+      }
     } else if (d.type === 'level') {
       wrap.style.setProperty('--lvl', d.lvl.toFixed(3));
-      const talking = d.lvl > 0.04;
-      wrap.classList.toggle('talking', talking);
-      if (engine.phase === 'live') stateEl.textContent = talking ? 'Freya is speaking' : 'Listening…';
-    } else if (d.type === 'agent') {
-      caption += d.text;
-      capEl.textContent = caption.slice(-160);
-    } else if (d.type === 'turn') {
-      caption = '';
+      wrap.classList.toggle('talking', d.lvl > 0.04);
     }
   });
 
-  orb.addEventListener('click', () => (engine.phase !== 'idle' ? open(true) : open(panel.hidden)));
-  $('vp-close').addEventListener('click', () => open(false));
-  $('vp-end').addEventListener('click', () => engine.stop());
-  $('vp-form').addEventListener('submit', (e) => { e.preventDefault(); engine.start(); });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !panel.hidden && engine.phase === 'idle') { open(false); orb.focus(); }
-  });
-  window.sixtyOrb = { open };
+  orb.addEventListener('click', () => (engine.phase === 'idle' ? engine.start() : engine.stop()));
 
   // The label slides in shortly after load to invite a click.
-  setTimeout(() => $('orb-label').classList.add('show'), 1800);
+  setTimeout(() => label.classList.add('show'), 1800);
 })();
