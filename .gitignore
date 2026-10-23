@@ -5,3 +5,5 @@ node_modules/
 email-previews/
 *.local.gs
 .DS_Store
+SIXTY- Leads/dashboard/
+.claude/

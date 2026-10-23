@@ -161,6 +161,8 @@ tr.click:hover td { background: rgba(255,255,255,.03); }
       <div class="logo"><span class="mark" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" stroke-width="2" opacity=".25"/><path d="M16 3a13 13 0 1 1-11.3 6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="16" cy="16" r="2.6" fill="currentColor"/></svg></span>Sixty <span class="by">Leads</span></div>
       <nav class="tabs" id="tabs">
         <button data-tab="leads" class="on">Leads</button>
+        <button data-tab="log">Email log</button>
+        <button data-tab="stats">Stats</button>
       </nav>
       <div class="spacer"></div>
       <button class="btn" id="refreshBtn" title="Refresh">Refresh</button>
@@ -185,6 +187,25 @@ tr.click:hover td { background: rgba(255,255,255,.03); }
       <div class="pager"><span class="muted small" id="pageInfo"></span><button class="btn" id="prevPage">Previous</button><button class="btn" id="nextPage">Next</button></div>
     </section>
 
+    <!-- Email log -->
+    <section id="tab-log" class="hidden">
+      <div class="toolbar"><h2>Email log</h2><span class="muted small" id="logCount"></span><div class="spacer"></div><input type="date" class="input" id="logDay" style="width:auto"></div>
+      <div class="card" style="padding:0"><div class="table-wrap" id="logTable"></div></div>
+    </section>
+
+    <!-- Stats -->
+    <section id="tab-stats" class="hidden">
+      <div class="toolbar"><h2>Stats</h2><div class="spacer"></div><select id="statsRange" style="width:auto;border-radius:999px"><option value="7">Last 7 days</option><option value="14" selected>Last 14 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option></select></div>
+      <div class="card" style="padding:0"><div class="table-wrap" id="statsTable"></div></div>
+      <p class="muted small">From Brevo. Opens are approximate (Apple Mail and some corporate filters open emails automatically). Replies are not tracked yet.</p>
+    </section>
+
+    <!-- Email detail -->
+    <div id="mailBg" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40" onclick="closeMail()"></div>
+    <aside id="mailPanel" class="hidden" style="position:fixed;top:0;right:0;bottom:0;width:min(440px,100vw);background:var(--panel);border-left:1px solid var(--line);z-index:41;padding:22px;overflow:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">Email details</h3><button class="btn small" onclick="closeMail()">Close</button></div>
+      <div id="mailBody" style="margin-top:16px"></div>
+    </aside>
 </main>
 </div>
 
@@ -264,7 +285,9 @@ function switchTab(tab) {
   state.tab = tab;
   $$('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
   $$('main > section').forEach(s => s.classList.toggle('hidden', s.id !== 'tab-' + tab));
-  loadLeads();
+  if (tab === 'log') loadLog();
+  if (tab === 'stats') loadStats();
+  if (tab === 'leads') loadLeads();
 }
 $$('#tabs button').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
 $('#refreshBtn').addEventListener('click', () => switchTab(state.tab));
@@ -317,6 +340,59 @@ $('#exportBtn').addEventListener('click', async () => {
     if (r.total > 500) toast('Exported the first 500 leads. Narrow the filters to export the rest.');
   } catch (err) { toast(err.message); }
 });
+
+// ---------------- Email log (read from Brevo) ----------------
+$('#logDay').value = new Date().toISOString().slice(0, 10);
+$('#logDay').addEventListener('change', loadLog);
+$('#statsRange').addEventListener('change', loadStats);
+const brevo = async (body) => {
+  const res = await fetch('/api/brevo-history', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: session.token, ...body }) });
+  const out = await res.json().catch(() => ({}));
+  if (!res.ok || !out.ok) throw new Error(out.error || 'Could not load Brevo data');
+  return out;
+};
+async function loadLog() {
+  try {
+    const out = await brevo({ mode: 'day', day: $('#logDay').value });
+    const rows = out.sentOn || [];
+    logRows = rows;
+    $('#logCount').textContent = `${fmt(rows.length)} sent on ${new Date($('#logDay').value + 'T12:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}`;
+    $('#logTable').innerHTML = rows.length ? `<table><thead><tr><th>Sent</th><th>Recipient</th><th>Subject</th><th>Status</th><th class="num">Opens</th><th class="num">Clicks</th></tr></thead><tbody>${rows.map((r, i) => `<tr class="click" data-i="${i}">
+      <td class="small">${when(r.sent_at)}</td><td class="trunc">${esc(r.email)}</td><td class="trunc">${esc(r.subject || '–')}</td>
+      <td>${statusPillFor(r.status)}</td>
+      <td class="num">${r.timeline.filter(t => t.event === 'opened').length}</td><td class="num">${r.timeline.filter(t => t.event === 'clicked').length}</td></tr>`).join('')}</tbody></table>` : '<div class="empty">No emails sent on this day.</div>';
+    $$('#logTable tr.click').forEach(tr => tr.addEventListener('click', () => openMail(logRows[Number(tr.dataset.i)])));
+  } catch (err) { toast(err.message); }
+}
+let logRows = [];
+const EVENT_LABEL = { sent: 'Sent', delivered: 'Delivered', opened: 'Opened', clicked: 'Clicked', hard_bounce: 'Hard bounce', soft_bounce: 'Soft bounce', blocked: 'Blocked', invalid: 'Invalid address', deferred: 'Deferred', spam: 'Marked as spam', unsubscribed: 'Unsubscribed' };
+const statusPillFor = (st) => `<span class="pill ${['delivered', 'opened', 'clicked'].includes(st) ? 'good' : ['hard_bounce', 'soft_bounce', 'blocked', 'invalid', 'spam'].includes(st) ? 'bad' : st === 'unsubscribed' ? 'warn' : ''}">${esc(EVENT_LABEL[st] || st)}</span>`;
+function openMail(r) {
+  if (!r) return;
+  $('#mailBody').innerHTML = `
+    <p class="muted small" style="margin:0">Recipient</p><p style="margin:2px 0 12px"><strong>${esc(r.email)}</strong></p>
+    <p class="muted small" style="margin:0">Subject</p><p style="margin:2px 0 12px">${esc(r.subject || '–')}</p>
+    <p class="muted small" style="margin:0">Current status</p><p style="margin:4px 0 16px">${statusPillFor(r.status)}</p>
+    <p class="muted small" style="margin:0 0 8px">Timeline</p>
+    <ol style="padding-left:18px;margin:0">${r.timeline.map(t => `<li style="margin-bottom:8px"><strong>${esc(EVENT_LABEL[t.event] || t.event)}</strong> <span class="muted small">${when(t.at)}</span>${t.link ? `<div class="small"><a href="${esc(t.link)}" target="_blank" rel="noopener">${esc(t.link)}</a></div>` : ''}${t.reason ? `<div class="small muted">${esc(t.reason)}</div>` : ''}</li>`).join('')}</ol>
+    <p class="muted small" style="margin-top:16px">Message ID: ${esc(r.messageId || '–')}</p>`;
+  $('#mailBg').classList.remove('hidden'); $('#mailPanel').classList.remove('hidden');
+}
+function closeMail() { $('#mailBg').classList.add('hidden'); $('#mailPanel').classList.add('hidden'); }
+
+// ---------------- Stats (read from Brevo) ----------------
+async function loadStats() {
+  try {
+    const out = await brevo({ mode: 'stats', days: Number($('#statsRange').value) });
+    const rows = out.stats || [];
+    const tot = rows.reduce((a, r) => { for (const k of Object.keys(a)) a[k] += r[k] || 0; return a; }, { sent: 0, delivered: 0, opened: 0, clicked: 0, bounced: 0, unsubscribed: 0, spam: 0, blocked: 0 });
+    $('#statsTable').innerHTML = `<table><thead><tr><th>Day</th><th class="num">Sent</th><th class="num">Delivered</th><th class="num">Opened</th><th class="num">Clicked</th><th class="num">Bounced</th><th class="num">Blocked</th><th class="num">Spam</th><th class="num">Unsubscribed</th></tr></thead><tbody>
+      <tr><td><strong>Total</strong></td><td class="num"><strong>${fmt(tot.sent)}</strong></td><td class="num">${pct(tot.delivered, tot.sent)}</td><td class="num">${pct(tot.opened, tot.delivered)}</td><td class="num">${pct(tot.clicked, tot.delivered)}</td><td class="num">${fmt(tot.bounced)}</td><td class="num">${fmt(tot.blocked)}</td><td class="num">${fmt(tot.spam)}</td><td class="num">${fmt(tot.unsubscribed)}</td></tr>
+      ${rows.map(r => `<tr class="click" data-day="${r.day}"><td>${new Date(r.day + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}</td><td class="num">${fmt(r.sent)}</td><td class="num">${fmt(r.delivered)}</td><td class="num">${fmt(r.opened)}</td><td class="num">${fmt(r.clicked)}</td><td class="num">${fmt(r.bounced)}</td><td class="num">${fmt(r.blocked)}</td><td class="num">${fmt(r.spam)}</td><td class="num">${fmt(r.unsubscribed)}</td></tr>`).join('')}
+    </tbody></table>`;
+    $$('#statsTable tr.click').forEach(tr => tr.addEventListener('click', () => { $('#logDay').value = tr.dataset.day; switchTab('log'); }));
+  } catch (err) { toast(err.message); }
+}
 
 // ---------------- Lead drawer ----------------
 function closeDrawer() { $('#drawer').classList.add('hidden'); $('#drawerBg').classList.add('hidden'); }
