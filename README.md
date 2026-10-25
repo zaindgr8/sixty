@@ -35,7 +35,19 @@ Both channels feed the same CRM panel (pipeline card, lead card, inbox, activity
 
 Limits on the Node server: voice 3 calls/hour per IP (10 min max each), chat 20 visitor messages per conversation and 40 per 10 minutes per IP, extraction 60 per 10 minutes. On Vercel, add equivalent firewall rate limits.
 
-## Leads CRM (Google Sheet)
+## Leads CRM (/crm)
+
+The project's CRM lives at `/crm` and is part of this repo, not a side page: `crm/index.html` is the shell and `crm/app.js` holds the logic. Vercel serves it at `/crm` (clean URLs) and the local dev server serves it the same way.
+
+Sign in with the dashboard login. Data comes from Supabase through the `dash_*` functions in `SIXTY- Leads/supabase/schema.sql` (`dash_login`, `dash_leads`, `dash_lead_events`, `dash_update_lead`), and the Email log and Stats tabs read Brevo through `/api/brevo-history`.
+
+Tabs: Leads (search, filters, lead drawer, CSV export), LinkedIn (leads tagged `linkedin_invited` or `linkedin_commented`, with invite and comment detail in the drawer), Funnel (pipeline counts from fetched leads, leads to contacted to replied to meetings booked to won, split by country, meetings booked as the headline number), Email log and Stats.
+
+Reply logging is manual for now: the lead drawer's Mark replied button sets the pipeline status to `replied` (which also stamps `replied_at`) and appends a dated note. The email sequence step shown in the drawer comes from `email_sequence_step` in the lead feed; the feed does not carry an emails-sent count or a segment field, so those are not shown.
+
+## Leads CRM (Google Sheet, legacy)
+
+Legacy: website demo leads were originally saved to a Google Sheet. The project's CRM is now /crm (see above); this section is kept for history.
 
 Every lead is saved in the **Sixty Leads CRM** Google Sheet (owned by desigeek0007@gmail.com): website form submissions, WhatsApp demo chats and voice demo calls. One chat or call stays one row (matched on *Record ID*) and fills in as Freya learns more. Your team owns the *Sales status*, *Owner* and *Notes* columns; the website never overwrites them. The *Summary* tab counts everything automatically.
 
