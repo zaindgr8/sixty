@@ -219,19 +219,19 @@ tr.click:hover td { background: rgba(255,255,255,.03); }
       <div class="card" style="padding:0;margin-top:12px"><div class="table-wrap" id="funnelTable"></div></div>
       <p class="muted small">From pipeline status in Supabase. Meetings booked (demo_booked) is the headline number. Split by country only: the lead feed does not carry a segment field.</p>
     </section>
-
-    <!-- Email detail -->
-    <div id="mailBg" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40" onclick="closeMail()"></div>
-    <aside id="mailPanel" class="hidden" style="position:fixed;top:0;right:0;bottom:0;width:min(440px,100vw);background:var(--panel);border-left:1px solid var(--line);z-index:41;padding:22px;overflow:auto">
-      <div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">Email details</h3><button class="btn small" onclick="closeMail()">Close</button></div>
-      <div id="mailBody" style="margin-top:16px"></div>
-    </aside>
 </main>
 </div>
 
 <!-- Lead drawer -->
 <div id="drawerBg" class="drawer-bg hidden"></div>
 <aside id="drawer" class="drawer hidden" aria-modal="true" role="dialog"></aside>
+
+<!-- Email detail -->
+<div id="mailBg" class="drawer-bg hidden" style="z-index:40" onclick="closeMail()"></div>
+<aside id="mailPanel" class="drawer hidden" style="z-index:41;width:min(460px,100%);overflow-wrap:anywhere;box-shadow:-30px 0 80px -20px rgba(0,0,0,.7)" aria-modal="true" role="dialog">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h3 style="margin:0">Email details</h3><button class="btn small" onclick="closeMail()">Close</button></div>
+  <div id="mailBody" style="margin-top:18px"></div>
+</aside>
 <div id="toast" class="toast hidden"></div>
 
 <script>
