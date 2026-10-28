@@ -3,9 +3,23 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --watch scripts/dev-server.mjs"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "dev:legacy": "node --watch scripts/dev-server.mjs"
   },
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "next": "^16.4.3",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^7.0.2"
   }
 }

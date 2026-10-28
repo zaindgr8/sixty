@@ -1,11 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
-  "cleanUrls": true,
-  "functions": {
-    "api/*.js": {
-      "includeFiles": "{lib,agents}/**",
-      "maxDuration": 30
-    }
-  }
+  "framework": "nextjs"
 }

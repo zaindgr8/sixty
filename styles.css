@@ -520,8 +520,8 @@ section[id] { scroll-margin-top: 72px; }
 .vdemo[data-phase="live"] .orb-bars i { height: calc(22% + var(--lvl) * 70%); transition: height .08s linear; }
 .vdemo[data-phase="live"] .orb-bars i:nth-child(2) { height: calc(30% + var(--lvl) * 85%); }
 .vdemo[data-phase="live"] .orb-bars i:nth-child(3) { height: calc(26% + var(--lvl) * 60%); }
-.vdemo[data-phase="live"] .orb-ring { animation-duration: 1.6s; border-color: rgba(255, 138, 140, .7); }
-
+/* panel */
+.vpanel {
   width: min(340px, calc(100vw - 32px)); border-radius: 22px; padding: 20px; display: flex; flex-direction: column; gap: 14px;
   background: rgba(18, 18, 19, .9); border: 1px solid var(--line-2); backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%);
   box-shadow: 0 30px 80px -20px rgba(0, 0, 0, .8), 0 0 60px -20px rgba(229, 72, 77, .45);
