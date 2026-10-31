@@ -237,16 +237,26 @@ async function loadLog() {
 let logRows = [];
 const EVENT_LABEL = { sent: 'Sent', delivered: 'Delivered', opened: 'Opened', clicked: 'Clicked', hard_bounce: 'Hard bounce', soft_bounce: 'Soft bounce', blocked: 'Blocked', invalid: 'Invalid address', deferred: 'Deferred', spam: 'Marked as spam', unsubscribed: 'Unsubscribed' };
 const statusPillFor = (st) => `<span class="pill ${['delivered', 'opened', 'clicked'].includes(st) ? 'good' : ['hard_bounce', 'soft_bounce', 'blocked', 'invalid', 'spam'].includes(st) ? 'bad' : st === 'unsubscribed' ? 'warn' : ''}">${esc(EVENT_LABEL[st] || st)}</span>`;
-function openMail(r) {
+async function openMail(r) {
   if (!r) return;
   $('#mailBody').innerHTML = `
     <p class="muted small" style="margin:0">Recipient</p><p style="margin:2px 0 12px"><strong>${esc(r.email)}</strong></p>
     <p class="muted small" style="margin:0">Subject</p><p style="margin:2px 0 12px">${esc(r.subject || '–')}</p>
     <p class="muted small" style="margin:0">Current status</p><p style="margin:4px 0 16px">${statusPillFor(r.status)}</p>
-    <p class="muted small" style="margin:0 0 8px">Timeline</p>
+    <p class="muted small" style="margin:0 0 8px">Email</p>
+    <div id="mailContent" class="email-preview"><div class="muted">Loading email…</div></div>
+    <p class="muted small" style="margin:16px 0 8px">Timeline</p>
     <ol style="padding-left:18px;margin:0">${r.timeline.map(t => `<li style="margin-bottom:8px"><strong>${esc(EVENT_LABEL[t.event] || t.event)}</strong> <span class="muted small">${when(t.at)}</span>${t.link ? `<div class="small"><a href="${esc(t.link)}" target="_blank" rel="noopener">${esc(t.link)}</a></div>` : ''}${t.reason ? `<div class="small muted">${esc(t.reason)}</div>` : ''}</li>`).join('')}</ol>
     <p class="muted small" style="margin-top:16px">Message ID: ${esc(r.messageId || '–')}</p>`;
   $('#mailBg').classList.remove('hidden'); $('#mailPanel').classList.remove('hidden');
+  // The full body comes from Brevo's transactional-email content endpoint, not
+  // the statistics feed (which never carries a body). Fetched on demand per email.
+  try {
+    const out = await brevo({ mode: 'body', messageId: r.messageId });
+    $('#mailContent').innerHTML = out.body ? sanitizeEmail(out.body) : '<div class="muted">Brevo has no content stored for this email.</div>';
+  } catch (err) {
+    $('#mailContent').innerHTML = `<div class="muted">${esc(err.message)}</div>`;
+  }
 }
 function closeMail() { $('#mailBg').classList.add('hidden'); $('#mailPanel').classList.add('hidden'); }
 
